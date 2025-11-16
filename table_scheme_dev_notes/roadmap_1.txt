@@ -1,0 +1,41 @@
+# Table Scheme & T-Exp Roadmap
+
+Notes:
+We are heading towards an approach where parentheses are used for immediate evaluation,
+and tables are used for data representation and code representation and therefore need to be lazy evaluated.
+But I think we could merge the semantics and both approaches could be parsed by the same parser. Traditional
+s-exp would be parsed as a table with indices starting from 0, and optional keys.
+
+------------------------------------------
+
+## Proposed Steps
+
+- Step 1: Document Intended Semantics
+    - Write a doc in `docs/table_scheme_dev_notes/` describing:
+        - Table literal syntax
+        - S-expression-to-table mapping
+        - Access patterns (index, key, dot, string)
+        - Evaluation rules (immediate vs lazy)
+        - Edge cases (empty tables, mixed keys, nesting)
+
+- Step 2: Write Edge-Case Tests
+    - Add a test file `tests/test_table_expressions.py` with cases for:
+        - Table literals with positional and named entries
+        - Nested tables
+        - Table as code block
+        - Table as environment
+        - Table access and mutation (index, key, dot, string)
+        - Evaluation of tables as code blocks
+
+- Step 3: Prototype Parser Extension
+    - Extend the parser to recognize curly-brace table literals
+    - Parse S-expressions as tables with positional indices
+    - Allow optional named keys in both forms
+    - Keep parsing and IR simple and explicit
+
+- Step 4: Review and Simplify
+    - Document parser changes and test results
+    - Review for simplicity and clarity
+    - Only move to evaluation after parsing is robust
+
+------------------------------------------

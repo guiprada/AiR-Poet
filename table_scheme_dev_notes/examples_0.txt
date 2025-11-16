@@ -1,0 +1,38 @@
+
+------------------------------------------ t-exp - is there such a thing already?
+--- ex 1 - literal tables, indexing and eval
+(define x 5)
+t:{
+    'a'
+    a: 1
+    b: 2
+    c: "oba"
+    x
+}
+(print t[0]) -> prints 'a'
+(print t[1]) -> prints 5
+(print t.a) -> prints 1
+(print t["b"]) -> prints 2
+{
+    do:(print t.c)
+} -> prints "oba"
+{
+    if: (> x 1)
+    them: (+ x 1)
+    else: (- x 2)
+}// now x = 3
+(print x) -> prints 3
+-------------------------------------------- table scheme
+(define t
+    '('a' a:1 b:2 c: "oba" x)
+)
+(print t[0]) -> prints 'a'
+(print t[1]) -> prints 5
+(print t.a) -> prints 1
+(print t["b"]) -> prints 2
+(if (> x 1)
+    them: (+ x 1)
+    else: (- x 2)
+)
+// now x = 3
+(print x) -> prints 3

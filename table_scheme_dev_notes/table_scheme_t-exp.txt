@@ -1,0 +1,12 @@
+not just hash tables as in Scheme or Lua, but about richer table semantics?possibly
+for environment modeling, grouping results, or more expressive computation.
+
+- Tables should be live editable
+- Table could be used to represent a computation
+- There should be a notationn to evaluate their value, this is the root of the computation representation
+- Table could be used as execution environment
+- Table could represent a computation in intermediary execution - kind like partial aplication
+
+- This could allow for more expressive, compositional code?where results are grouped or named in tables.
+- It could enable new patterns for environment management, result aggregation, or even multi-value returns.
+- The syntax and semantics are still fluid, and you?re in the exploration phase.

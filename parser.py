@@ -1,25 +1,5 @@
-from prelude import OPERATOR_LIST, OPERATOR_DICT
 class ASTNode:
     pass
-
-def Operator_or_Identifier(name: str) -> ASTNode:
-    if name in OPERATOR_LIST:
-        return Operator(name)
-    else:
-        return Identifier(name)
-
-class Operator(ASTNode):
-    def __init__(self, name: str):
-        if not isinstance(name, str) or not name:
-            raise ValueError("Parser - Operator name must be a non-empty string")
-
-        self.name = OPERATOR_DICT[name]
-
-    def __eq__(self, other):
-        return isinstance(other, Operator) and self.name == other.name
-
-    def __repr__(self):
-        return f"Operator({self.name})"
 
 class Identifier(ASTNode):
     def __init__(self, name: str):
@@ -109,7 +89,7 @@ def expression(tokens: list, pos: int):
     elif token.token_type == 'number':
         return NumberLiteral(token.value), pos + 1
     elif token.token_type == 'identifier':
-        return Operator_or_Identifier(token.value), pos + 1
+        return Identifier(token.value), pos + 1
     raise ValueError(f"Parser - Unexpected token: {token!r}")
 
 

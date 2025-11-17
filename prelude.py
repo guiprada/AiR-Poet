@@ -1,13 +1,13 @@
 import builtins
 
 OPERATOR_DICT = {
-    '+': 'add',
-    '-': 'subtract',
-    '*': 'multiply',
-    '/': 'divide',
+    '+': 'plus',
+    '-': 'minus',
+    '*': 'star',
+    '/': 'slash',
     '%': 'modulus',
-    '^': 'exponent',
-    '//': 'floor_divide',
+    '^': 'caret',
+    '//': 'double_slash',
 }
 
 OPERATOR_LIST = list(OPERATOR_DICT.keys())

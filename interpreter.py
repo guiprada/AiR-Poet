@@ -1,5 +1,5 @@
 # table_scheme/interpreter.py
-from parser import CallExpression, NumberLiteral, StringLiteral, Identifier, Operator
+from parser import CallExpression, NumberLiteral, StringLiteral, Identifier
 import prelude as prelude
 
 def interpret(ast):
@@ -10,7 +10,7 @@ def interpret(ast):
         return ast.value
     elif isinstance(ast, StringLiteral):
         return ast.value
-    elif isinstance(ast, Identifier) or isinstance(ast, Operator):
+    elif isinstance(ast, Identifier):
        # Check if the identifier is a prelude function
         if hasattr(prelude, ast.name):
             return getattr(prelude, ast.name)  # Return the function pointer

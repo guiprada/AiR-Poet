@@ -1,10 +1,31 @@
+from prelude import OPERATOR_LIST, OPERATOR_DICT
 class ASTNode:
     pass
+
+def Operator_or_Identifier(name: str) -> ASTNode:
+    if name in OPERATOR_LIST:
+        return Operator(name)
+    else:
+        return Identifier(name)
+
+class Operator(ASTNode):
+    def __init__(self, name: str):
+        if not isinstance(name, str) or not name:
+            raise ValueError("Parser - Operator name must be a non-empty string")
+
+        self.name = OPERATOR_DICT[name]
+
+    def __eq__(self, other):
+        return isinstance(other, Operator) and self.name == other.name
+
+    def __repr__(self):
+        return f"Operator({self.name})"
 
 class Identifier(ASTNode):
     def __init__(self, name: str):
         if not isinstance(name, str) or not name:
-            raise ValueError("Identifier name must be a non-empty string")
+            raise ValueError("Parser - Identifier name must be a non-empty string")
+
         self.name = name
 
     def __eq__(self, other):
@@ -17,7 +38,7 @@ class Identifier(ASTNode):
 class StringLiteral(ASTNode):
     def __init__(self, value: str):
         if not isinstance(value, str):
-            raise ValueError("StringLiteral value must be a string")
+            raise ValueError("Parser - StringLiteral value must be a string")
         self.value = value.strip('"')
 
     def __eq__(self, other):
@@ -35,16 +56,16 @@ class NumberLiteral(ASTNode):
             try:
                 return float(value), "float"
             except ValueError:
-                raise ValueError("NumberLiteral value must be build from a int or float string")
+                raise ValueError("Parser - NumberLiteral value must be build from a int or float string")
 
     def __init__(self, value: str):
         if not isinstance(value, str):
-            raise ValueError("NumberLiteral value must be buildt from a string")
+            raise ValueError("Parser - NumberLiteral value must be buildt from a string")
 
         self.value, self.type = NumberLiteral.number_typing(value)
 
     def __eq__(self, other):
-        return isinstance(other, NumberLiteral) and self.value == other.value
+        return isinstance(other, NumberLiteral) and self.value == other.value and self.type == other.type
 
     def __repr__(self):
         return f"NumberLiteral({self.value})"
@@ -53,11 +74,11 @@ class NumberLiteral(ASTNode):
 class CallExpression(ASTNode):
     def __init__(self, callee: ASTNode, arguments: list):
         if not isinstance(callee, ASTNode):
-            raise ValueError("callee must be an ASTNode")
+            raise ValueError("Parser - callee must be an ASTNode")
         if not isinstance(arguments, list):
-            raise ValueError("arguments must be a list")
+            raise ValueError("Parser - arguments must be a list")
         if not all(isinstance(arg, ASTNode) for arg in arguments):
-            raise ValueError("all arguments must be ASTNode instances")
+            raise ValueError("Parser - all arguments must be ASTNode instances")
         self.callee = callee
         self.arguments = arguments
 
@@ -67,13 +88,15 @@ class CallExpression(ASTNode):
     def __repr__(self):
         return f"CallExpression({self.callee}, {self.arguments})"
 
+    def arity(self):
+        return len(self.arguments)
 
 def parse(tokens: list):
     if not tokens:
         return None
     ast, pos = expression(tokens, 0)
     if pos < len(tokens):
-        raise ValueError(f"Unexpected token at position {pos}")
+        raise ValueError(f"Parser - Unexpected token at position {pos}")
     return ast
 
 
@@ -86,8 +109,8 @@ def expression(tokens: list, pos: int):
     elif token.token_type == 'number':
         return NumberLiteral(token.value), pos + 1
     elif token.token_type == 'identifier':
-        return Identifier(token.value), pos + 1
-    raise ValueError(f"Unexpected token: {token}")
+        return Operator_or_Identifier(token.value), pos + 1
+    raise ValueError(f"Parser - Unexpected token: {token!r}")
 
 
 def call(tokens: list, pos: int):
@@ -98,5 +121,5 @@ def call(tokens: list, pos: int):
         arg, pos = expression(tokens, pos)
         arguments.append(arg)
     if pos >= len(tokens):
-        raise ValueError("Unmatched opening paren")
+        raise ValueError("Parser - Unmatched opening paren")
     return CallExpression(callee, arguments), pos + 1

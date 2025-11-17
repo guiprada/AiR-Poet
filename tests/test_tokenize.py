@@ -7,28 +7,33 @@ class TestTokenize(unittest.TestCase):
     def test_tokenize_print_string(self):
         tokens = tokenize('(print "hello")')
         self.assertEqual(len(tokens), 4)
-        self.assertEqual(tokens[0], Token('paren', '('))
-        self.assertEqual(tokens[1], Token('identifier', 'print'))
-        self.assertEqual(tokens[2], Token('string', '"hello"'))
-        self.assertEqual(tokens[3], Token('paren', ')'))
+        self.assertEqual(tokens[0], Token('paren', '(', 1, 1))
+        self.assertEqual(tokens[1], Token('identifier', 'print', 1, 2))
+        self.assertEqual(tokens[2], Token('string', '"hello"', 1, 8))
+        self.assertEqual(tokens[3], Token('paren', ')', 1, 15))
 
     def test_tokenize_print_number(self):
         tokens = tokenize('(print 42)')
         self.assertEqual(len(tokens), 4)
-        self.assertEqual(tokens[0], Token('paren', '('))
-        self.assertEqual(tokens[1], Token('identifier', 'print'))
-        self.assertEqual(tokens[2], Token('number', '42'))
-        self.assertEqual(tokens[3], Token('paren', ')'))
+        self.assertEqual(tokens[0], Token('paren', '(', 1, 1))
+        self.assertEqual(tokens[1], Token('identifier', 'print', 1, 2))
+        self.assertEqual(tokens[2], Token('number', '42', 1, 8))
+        self.assertEqual(tokens[3], Token('paren', ')', 1, 10))
 
     def test_tokenize_empty_string(self):
         tokens = tokenize('(print "")')
         self.assertEqual(len(tokens), 4)
-        self.assertEqual(tokens[2], Token('string', '""'))
+        self.assertEqual(tokens[2], Token('string', '""', 1, 8))
 
     def test_tokenize_with_spaces(self):
         tokens = tokenize('(print "a b c")')
         self.assertEqual(len(tokens), 4)
-        self.assertEqual(tokens[2], Token('string', '"a b c"'))
+        self.assertEqual(tokens[2], Token('string', '"a b c"', 1, 8))
+
+    def test_tokenize_negative_number(self):
+        tokens = tokenize('(print -42)')
+        self.assertEqual(len(tokens), 4)
+        self.assertEqual(tokens[2], Token('number', '-42', 1, 8))
 
     def test_tokenize_missing_closing_paren(self):
         with self.assertRaises(ValueError):

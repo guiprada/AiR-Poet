@@ -2,7 +2,7 @@ import unittest
 from tests.utils import interpret_ast_and_capture_output
 
 from interpreter import interpret
-from parser import CallExpression, NumberLiteral, StringLiteral, Identifier
+from parser import CallExpression, NumberLiteral, StringLiteral, Identifier, Operator
 
 
 
@@ -12,6 +12,11 @@ class TestInterpreter(unittest.TestCase):
         ast = CallExpression(Identifier("add"), [NumberLiteral("1"), NumberLiteral("2")])
         result = interpret(ast)
         self.assertEqual(result, 3)
+
+    def test_add_operator(self):
+        ast = CallExpression(Operator("+"), [NumberLiteral("10"), NumberLiteral("15")])
+        result = interpret(ast)
+        self.assertEqual(result, 25)
 
     def test_add_negative_numbers(self):
         ast = CallExpression(Identifier("add"), [NumberLiteral("-1"), NumberLiteral("-2")])

@@ -1,6 +1,6 @@
 import unittest
 from tokenizer import tokenize
-from parser import parse, CallExpression, StringLiteral, NumberLiteral, Identifier
+from parser import parse, CallExpression, StringLiteral, NumberLiteral, Identifier, Operator
 
 
 class TestParser(unittest.TestCase):
@@ -23,7 +23,7 @@ class TestParser(unittest.TestCase):
     def test_parse_nested_parens(self):
         tokens = tokenize('(print (+ 1 2))')
         ast = parse(tokens)
-        inner = CallExpression(Identifier('+'), [NumberLiteral('1'), NumberLiteral('2')])
+        inner = CallExpression(Operator('+'), [NumberLiteral('1'), NumberLiteral('2')])
         expected = CallExpression(Identifier('print'), [inner])
         self.assertEqual(ast, expected)
 

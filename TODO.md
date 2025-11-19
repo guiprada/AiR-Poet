@@ -1,7 +1,5 @@
 TODO
-- Operator functions should be arity agnostic :) - Where should the arity be considered and dispatched?
-
-
+- REPL file loader
 - Add support for tokenizing negative numbers. Extend the numeric tokenizer to consume a leading - only if it?s part of a number. A common trick: when you see -, look?ahead to see if the next character is a digit; if so, start a negative number token.
 - Add an environment dict that maps names to values. In interpret, first check env before falling back to prelude.
 - Your parser uses token.value as-is, so a tokenizer that recognises // as one token is required.Ensure your tokenizer emits // as a single token; otherwise the parser will see '/','/'.
@@ -18,5 +16,6 @@ MAYBE
 
 ###############################################################################
 DONE
+- Operator functions should be arity agnostic :) - Where should the arity be considered and dispatched?
 - These - Should we remove operator? The simplest thing is to have and Identifier Only
 - Add check to BUILTINS_DICT shadowing prelude functions

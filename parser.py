@@ -2,17 +2,17 @@ class ASTNode:
     pass
 
 class Identifier(ASTNode):
-    def __init__(self, name: str):
-        if not isinstance(name, str) or not name:
+    def __init__(self, value: str):
+        if not isinstance(value, str) or not value:
             raise ValueError("Parser - Identifier name must be a non-empty string")
 
-        self.name = name
+        self.value = value
 
     def __eq__(self, other):
-        return isinstance(other, Identifier) and self.name == other.name
+        return isinstance(other, Identifier) and self.value == other.value
 
     def __repr__(self):
-        return f"Identifier({self.name})"
+        return f"Identifier({self.value})"
 
 
 class StringLiteral(ASTNode):

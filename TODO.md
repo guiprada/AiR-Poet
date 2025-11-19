@@ -1,6 +1,4 @@
 TODO
-
-- These - Should we remove operator? The simplest thing is to have and Identifier Only
 - Operator functions should be arity agnostic :) - Where should the arity be considered and dispatched?
 
 
@@ -20,3 +18,5 @@ MAYBE
 
 ###############################################################################
 DONE
+- These - Should we remove operator? The simplest thing is to have and Identifier Only
+- Add check to BUILTINS_DICT shadowing prelude functions

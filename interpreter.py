@@ -1,6 +1,12 @@
 # table_scheme/interpreter.py
 from parser import CallExpression, NumberLiteral, StringLiteral, Identifier
+
+# A single lookup table that contains *all* prelude callables.
+# Operators are mapped directly to the function objects.
 import prelude as prelude
+LOOKUP = {name: getattr(prelude, name) for name in dir(prelude) if callable(getattr(prelude, name))}
+LOOKUP.update(prelude.OPERATOR_DICT)  # now keys are symbols, values are function names
+LOOKUP.update(prelude.build_builtin_lookup())
 
 def interpret(ast):
     """
@@ -10,13 +16,15 @@ def interpret(ast):
         return ast.value
     elif isinstance(ast, StringLiteral):
         return ast.value
-    elif isinstance(ast, Identifier):
-       # Check if the identifier is a prelude function
-        if hasattr(prelude, ast.name):
-            return getattr(prelude, ast.name)  # Return the function pointer
-        else:
-            # Implement variable lookup here
-            raise NameError(f"Interpreter - Undefined variable: {ast.name}")
+    if isinstance(ast, Identifier):
+        # Variable lookup
+        # if ast.value in env:
+        #     return env[ast.value]
+
+        # Prelude / operator lookup
+        if ast.value in LOOKUP:
+            return LOOKUP[ast.value]
+        raise NameError(f"Interpreter - Undefined identifier: {ast.value}")
     elif isinstance(ast, CallExpression):
         procedure = interpret(ast.callee)  # Interpret function identifier
         args = [interpret(arg) for arg in ast.arguments]  # Interpret arguments

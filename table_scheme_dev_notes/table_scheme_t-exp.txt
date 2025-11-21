@@ -1,5 +1,8 @@
-not just hash tables as in Scheme or Lua, but about richer table semantics?possibly
+Not just hash tables as in Scheme or Lua, but about richer table semantics?possibly
 for environment modeling, grouping results, or more expressive computation.
+
+Parentheses are used for immediate evaluation,
+and tables are used for data representation and code representation and therefore need to be lazy evaluated.
 
 - Tables should be live editable
 - Table could be used to represent a computation

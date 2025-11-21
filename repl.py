@@ -17,25 +17,40 @@ Example:
 """
 from tokenizer import tokenize
 from parser import parse
-from interpreter import interpret
+from interpreter import interpret, load_file
 
 def main():
     print("Table Scheme REPL. Type 'exit' to quit.")
+    env = {}
     while True:
         try:
             line = input(">>> ")
         except EOFError:
             print("\nBye!")
             break
+        if line.startswith('run '):
+            path = line[4:].strip()
+            try:
+                ast = load_file(path)
+                result = interpret(ast, env)
+                print(result)
+            except Exception as e:
+                print(f"REPL error: {e}")
+            continue
+        if line.strip().lower() == "env":
+            print("Environment:")
+            for key, value in env.items():
+                print(f"  {key} = {value}")
+            continue
         if line.strip().lower() == "exit":
             print("Bye!")
             break
         try:
             tokens = tokenize(line)
             ast = parse(tokens)
-            interpret(ast)
+            interpret(ast, env)
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"REPL error: {e}")
 
 
 if __name__ == "__main__":

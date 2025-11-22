@@ -13,9 +13,6 @@ def adder(*args):
     return sum(args)
 
 def add(x, y):
-    """
-    Adds two numbers.
-    """
     return x + y
 plus = add
 
@@ -28,9 +25,6 @@ def subtracter(*args):
     return result
 
 def subtract(x, y):
-    """
-    Subtracts y from x.
-    """
     return x - y
 minus = subtract
 
@@ -43,9 +37,6 @@ def multiplier(*args):
     return result
 
 def multiply(x, y):
-    """
-    Multiplies two numbers.
-    """
     return x * y
 star = multiply
 
@@ -58,31 +49,19 @@ def divider(arg1, arg2, *args):
     return result
 
 def divide(x, y):
-    """
-    Divides x by y.
-    """
     if y == 0:
         raise ValueError("Cannot divide by zero.")
     return x / y
 slash = divide
 
 def modulus(x, y):
-    """
-    Returns the modulus of x by y.
-    """
     return x % y
 
 def exponent(x, y):
-    """
-    Raises x to the power of y.
-    """
     return x ** y
 caret = exponent
 
 def floor_divide(x, y):
-    """
-    Performs floor division of x by y.
-    """
     if y == 0:
         raise ValueError("Cannot divide by zero.")
     return x // y

@@ -77,8 +77,8 @@ Currently, the following forms are recognized as special forms:
       init: (define i 0),
       cond: (<= i 5)
       loop: (
-          <: (print i),
-          <: (define i (+ i 1))
+          (print i),
+          (define i (+ i 1))
       )
     }
     ```

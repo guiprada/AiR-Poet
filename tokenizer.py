@@ -1,7 +1,12 @@
 from typing import Tuple
 
 ALLOWED_TOKEN_TYPES = {
-    'paren',
+    'lparen',
+    'rparen',
+    'lbrace',
+    'rbrace',
+    'colon',
+    'comma',
     'string',
     'number',
     'identifier',
@@ -46,14 +51,16 @@ def handle_string_literal(code: str, tokens: list, start_pos: int, line: int, co
 
 def handle_other_tokens(code: str, tokens: list, start_pos: int, line: int, column: int) -> Tuple[int, int, int]:
     lookahead = start_pos
-    while lookahead < len(code) and not code[lookahead].isspace() and code[lookahead] not in '()':
+    while lookahead < len(code) and not code[lookahead].isspace() and code[lookahead] not in '():,':
         lookahead += 1
 
     if start_pos == lookahead:
         raise ValueError(f"Tokenizer - Invalid character at position {start_pos}: {code[start_pos]}")
 
     token_value = code[start_pos:lookahead]
-    if token_value.isdigit():
+    if token_value.startswith('-') and token_value[1:].isdigit():
+        tokens.append(Token('number', token_value, line, column))
+    elif token_value.isdigit():
         tokens.append(Token('number', token_value, line, column))
     else:
         tokens.append(Token('identifier', token_value, line, column))
@@ -81,13 +88,29 @@ def tokenize(code: str) -> list:
 
         match code[current_pos]:
             case '(':  # Open parenthesis
-                tokens.append(Token('paren', '(', line, column))
+                tokens.append(Token('lparen', '(', line, column))
                 paren_count += 1
                 current_pos += 1
             case ')':  # Close parenthesis
-                tokens.append(Token('paren', ')', line, column))
+                tokens.append(Token('rparen', ')', line, column))
                 paren_count -= 1
                 current_pos += 1
+            case '{':  # Open braces
+                tokens.append(Token('lbrace', '{', line, column))
+                paren_count += 1
+                current_pos += 1
+            case '}':  # Close braces
+                tokens.append(Token('rbrace', '}', line, column))
+                paren_count -= 1
+                current_pos += 1
+            case ':':
+                tokens.append(Token('colon', ':', line, column))
+                current_pos += 1
+                column += 1
+            case ',':
+                tokens.append(Token('comma', ',', line, column))
+                current_pos += 1
+                column += 1
             case '"':  # String literal
                 current_pos, line, column = handle_string_literal(code, tokens, current_pos, line, column)
             case _:  # Identifier or number

@@ -7,18 +7,18 @@ class TestTokenize(unittest.TestCase):
     def test_tokenize_print_string(self):
         tokens = tokenize('(print "hello")')
         self.assertEqual(len(tokens), 4)
-        self.assertEqual(tokens[0], Token('paren', '(', 1, 1))
+        self.assertEqual(tokens[0], Token('lparen', '(', 1, 1))
         self.assertEqual(tokens[1], Token('identifier', 'print', 1, 2))
         self.assertEqual(tokens[2], Token('string', '"hello"', 1, 8))
-        self.assertEqual(tokens[3], Token('paren', ')', 1, 15))
+        self.assertEqual(tokens[3], Token('rparen', ')', 1, 15))
 
     def test_tokenize_print_number(self):
         tokens = tokenize('(print 42)')
         self.assertEqual(len(tokens), 4)
-        self.assertEqual(tokens[0], Token('paren', '(', 1, 1))
+        self.assertEqual(tokens[0], Token('lparen', '(', 1, 1))
         self.assertEqual(tokens[1], Token('identifier', 'print', 1, 2))
         self.assertEqual(tokens[2], Token('number', '42', 1, 8))
-        self.assertEqual(tokens[3], Token('paren', ')', 1, 10))
+        self.assertEqual(tokens[3], Token('rparen', ')', 1, 10))
 
     def test_tokenize_empty_string(self):
         tokens = tokenize('(print "")')

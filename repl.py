@@ -18,10 +18,11 @@ Example:
 from tokenizer import tokenize
 from parser import parse
 from interpreter import interpret, load_file
+from air_types import Table
 
 def main():
     print("Table Scheme REPL. Type 'exit' to quit.")
-    env = {}
+    env = Table()
     while True:
         try:
             line = input(">>> ")
@@ -38,9 +39,7 @@ def main():
                 print(f"REPL error: {e}")
             continue
         if line.strip().lower() == "env":
-            print("Environment:")
-            for key, value in env.items():
-                print(f"  {key} = {value}")
+            print("Environment:\n", repr(env))
             continue
         if line.strip().lower() == "exit":
             print("Bye!")

@@ -1,76 +1,4 @@
-class ASTNode:
-    pass
-
-class Identifier(ASTNode):
-    def __init__(self, value: str):
-        if not isinstance(value, str) or not value:
-            raise ValueError("Parser - Identifier name must be a non-empty string")
-
-        self.value = value
-
-    def __eq__(self, other):
-        return isinstance(other, Identifier) and self.value == other.value
-
-    def __repr__(self):
-        return f"Identifier({self.value})"
-
-
-class StringLiteral(ASTNode):
-    def __init__(self, value: str):
-        if not isinstance(value, str):
-            raise ValueError("Parser - StringLiteral value must be a string")
-        self.value = value.strip('"')
-
-    def __eq__(self, other):
-        return isinstance(other, StringLiteral) and self.value == other.value
-
-    def __repr__(self):
-        return f"StringLiteral({self.value})"
-
-class NumberLiteral(ASTNode):
-    @staticmethod
-    def number_typing(value: str):
-        try:
-            return int(value), "int"
-        except ValueError:
-            try:
-                return float(value), "float"
-            except ValueError:
-                raise ValueError("Parser - NumberLiteral value must be build from a int or float string")
-
-    def __init__(self, value: str):
-        if not isinstance(value, str):
-            raise ValueError("Parser - NumberLiteral value must be buildt from a string")
-
-        self.value, self.type = NumberLiteral.number_typing(value)
-
-    def __eq__(self, other):
-        return isinstance(other, NumberLiteral) and self.value == other.value and self.type == other.type
-
-    def __repr__(self):
-        return f"NumberLiteral({self.value})"
-
-
-class CallExpression(ASTNode):
-    def __init__(self, callee: ASTNode, arguments: list):
-        if not isinstance(callee, ASTNode):
-            raise ValueError("Parser - callee must be an ASTNode")
-        if not isinstance(arguments, list):
-            raise ValueError("Parser - arguments must be a list")
-        if not all(isinstance(arg, ASTNode) for arg in arguments):
-            raise ValueError("Parser - all arguments must be ASTNode instances")
-        self.callee = callee
-        self.arguments = arguments
-
-    def __eq__(self, other):
-        return isinstance(other, CallExpression) and self.callee == other.callee and self.arguments == other.arguments
-
-    def __repr__(self):
-        return f"CallExpression({self.callee}, {self.arguments})"
-
-    def arity(self):
-        return len(self.arguments)
-
+from ASTNode import IdentifierNode, StringNode, NumberNode, TableNode, CallExpressionNode
 def parse(tokens: list):
     if not tokens:
         return None
@@ -79,17 +7,64 @@ def parse(tokens: list):
         raise ValueError(f"Parser - Unexpected token at position {pos}")
     return ast
 
+def parse_table(tokens, pos):
+    if tokens[pos].token_type != 'lbrace':
+        raise ValueError(f"Expected '{{' at position {pos}")
+
+    pos += 1  # Skip '{'
+    elements = []
+    map = {}
+
+    while pos < len(tokens) and tokens[pos].token_type != 'rbrace':
+        # Parse the next item
+        item, pos = expression(tokens, pos)
+
+        # Check if it's followed by a colon (named item)
+        if pos < len(tokens) and tokens[pos].token_type == 'colon':
+            # This is a named item: key: value
+            if not isinstance(item, (IdentifierNode, StringNode, NumberNode)):
+                raise ValueError(f"Table key must be identifier, string, or number at position {pos}")
+
+            # Get the key name
+            key = item.value if hasattr(item, 'value') else str(item)
+            pos += 1  # Skip ':'
+
+            # Parse the value
+            value, pos = expression(tokens, pos)
+            if isinstance(item, NumberNode):
+                while len(elements) <= item.value:
+                    elements.append(None)
+
+                elements[item.value] = value
+            else:
+                map[key] = value
+        else:
+            # This is a positional item
+            elements.append(item)
+
+        # Skip optional comma or whitespace
+        if pos < len(tokens) and tokens[pos].token_type in ('comma', 'whitespace'):
+            pos += 1
+
+    if pos >= len(tokens) or tokens[pos].token_type != 'rbrace':
+        raise ValueError("Unmatched '{' in table literal")
+
+    pos += 1  # Skip '}'
+    return TableNode(elements, map), pos
+
 
 def expression(tokens: list, pos: int):
     token = tokens[pos]
-    if token.token_type == 'paren' and token.value == '(':
+    if token.token_type == 'lbrace':
+        return parse_table(tokens, pos)
+    elif token.token_type == 'lparen':
         return call(tokens, pos)
     elif token.token_type == 'string':
-        return StringLiteral(token.value), pos + 1
+        return StringNode(token.value), pos + 1
     elif token.token_type == 'number':
-        return NumberLiteral(token.value), pos + 1
+        return NumberNode(token.value), pos + 1
     elif token.token_type == 'identifier':
-        return Identifier(token.value), pos + 1
+        return IdentifierNode(token.value), pos + 1
     raise ValueError(f"Parser - Unexpected token: {token!r}")
 
 
@@ -97,9 +72,9 @@ def call(tokens: list, pos: int):
     pos += 1
     callee, pos = expression(tokens, pos)
     arguments = []
-    while pos < len(tokens) and not (tokens[pos].token_type == 'paren' and tokens[pos].value == ')'):
+    while pos < len(tokens) and not (tokens[pos].token_type == 'rparen'):
         arg, pos = expression(tokens, pos)
         arguments.append(arg)
     if pos >= len(tokens):
-        raise ValueError("Parser - Unmatched opening paren")
-    return CallExpression(callee, arguments), pos + 1
+        raise ValueError("Parser - Unmatched lparen")
+    return CallExpressionNode(callee, arguments), pos + 1

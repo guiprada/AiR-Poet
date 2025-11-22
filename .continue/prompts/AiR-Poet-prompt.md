@@ -44,6 +44,10 @@ Guidelines for AI-generated code contributions:
 We create the tests first, then the code to make the tests pass.
 We move forward in small steps, adding a test at a time.
 
+If the assistant needs to check a file that was not provided, the assistant must first ask the user to provide the complete content of the target file.
+The assistant should only propose or generate edits after receiving that content.
+If the file is not explicitly supplied, the assistant must refuse to guess and request the file text. Do not operate with incomplete information!
+
 Do nots
 - No halth solutions.
 - Do not act when in doubt or dealing with incomplete information.
@@ -52,6 +56,7 @@ Do nots
 - Do not add flexibility you do not use at least twice.
 - Do not mask errors.
 - Do not adapt, do not be lenient. If code must be fixed, fix it.
+- Do not create docstrings. Avoid Noisy and verbose docstrings. Use docstring only when necessary for some non-trivial case.
 
 Caution
 - Dependencies should be added with caution and only in special cases. Prefer writing simple, tailormade code over adding dependencies.

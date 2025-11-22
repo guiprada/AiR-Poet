@@ -1,0 +1,57 @@
+------------------------------------------ t-exp - is there such a thing already?
+--- ex 1 - literal tables, indexing and eval
+(define x 5)
+t:{
+    'a'
+    a: 1
+    b: 2
+    c: "oba"
+    x
+}
+(print t[0]) -> prints 'a'
+(print t[1]) -> prints 5
+(print t.a) -> prints 1
+(print t["b"]) -> prints 2
+comp_t_1:{
+    (print t.c)
+}
+(eval comp_t) -> prints "oba"
+comp_t_2:{
+    (define a "hello")
+    (define b " ")
+    (define c "world")
+    (print (+ a b c))
+}
+(eval comp_t_2) -> prints "hello world"
+<:comp_t_2 -> prints "hello world"
+--- ex 2 - tables as computation representation
+{
+    if: (> x 1)
+    them: (+ x 1)
+    else: (- x 2)
+}// now x = 3
+(print x) -> prints 3
+(eval {
+	init: (define i 0)
+	cond: (<= i 5)
+	loop: (
+		(print i)
+		(increment i)
+	)
+}) -> prints 0 1 2 3 4 5
+--- ex 3 - combined
+
+-------------------------------------------- table scheme
+(define t
+    {'a' a:1 b:2 c: "oba" x}
+)
+(print t[0]) -> prints 'a'
+(print t[1]) -> prints 5
+(print t.a) -> prints 1
+(print t["b"]) -> prints 2
+(if (> x 1)
+    them: (+ x 1)
+    else: (- x 2)
+)
+// now x = 3
+(print x) -> prints 3

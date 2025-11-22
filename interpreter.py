@@ -1,5 +1,6 @@
-from parser import CallExpression, NumberLiteral, StringLiteral, Identifier, parse
+from parser import parse
 from tokenizer import tokenize
+from ASTNode import ASTNode, TableNode, CallExpressionNode, NumberNode, StringNode, TableNode, IdentifierNode
 
 # A single lookup table that contains *all* prelude callables.
 # Operators are mapped directly to the function objects.
@@ -10,24 +11,6 @@ LOOKUP.update(prelude.build_builtin_lookup())
 
 # Environment to store variables and functions
 def load_file(file_path: str):
-    """
-    Loads a source file and parses it into an AST.
-
-    Parameters
-    ----------
-    file_path : str
-        Path to the file to load.
-
-    Returns
-    ------
-    AST
-    Raises
-    ------
-    FileNotFoundError
-        If the file cannot be opened.
-    ValueError
-        If the file contains syntax errors or unsupported AST nodes.
-    """
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             source = f.read()
@@ -42,15 +25,40 @@ def load_file(file_path: str):
     except Exception as e:
         raise ValueError(f"Error parsing file '{file_path}': {e}") from e
 
-def interpret(ast, env):
-    """
-    Interprets an Abstract Syntax Tree (AST).
-    """
-    if isinstance(ast, NumberLiteral):
+# def eval_table(table: Table, env: Table):
+#     # Create a new environment for this evaluation context
+#     eval_env = Table(meta_table = env)
+
+#     # First, evaluate all positional items
+#     evaluated_list = []
+#     for item in table.elements:
+#         evaluated_list.append(interpret(item, eval_env))
+
+#     # Then, evaluate all named items
+#     evaluated_dict = {}
+#     for key, value in table.map.items():
+#         evaluated_dict[key] = interpret(value, eval_env)
+
+#     # Handle special forms (if:, init:, cond:, loop:, etc.)
+#     # This is where you'd implement the t-exp special forms
+
+#     # For now, return a runtime Table object
+#     return None
+
+def interpret(ast: ASTNode, env: TableNode):
+    if isinstance(ast, NumberNode):
         return ast.value
-    elif isinstance(ast, StringLiteral):
+    elif isinstance(ast, StringNode):
         return ast.value
-    if isinstance(ast, Identifier):
+    elif isinstance(ast, TableNode):
+        # Return the TableLiteral as a data structure - DO NOT evaluate contents
+        # This preserves the lazy evaluation semantics
+        # Here we should convert to a Table, should not we?
+
+        # You need to handle eval and <: special forms:
+
+        return ast
+    if isinstance(ast, IdentifierNode):
         # Variable lookup
         if ast.value in env:
             return env[ast.value]
@@ -59,7 +67,7 @@ def interpret(ast, env):
         if ast.value in LOOKUP:
             return LOOKUP[ast.value]
         raise NameError(f"Interpreter - Undefined identifier: {ast.value}")
-    elif isinstance(ast, CallExpression):
+    elif isinstance(ast, CallExpressionNode):
         procedure = interpret(ast.callee, env)  # Interpret function identifier
         args = [interpret(arg, env) for arg in ast.arguments]  # Interpret arguments
         try:

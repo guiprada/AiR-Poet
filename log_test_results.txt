@@ -1,0 +1,45 @@
+test_add (test_interpreter.TestInterpreter.test_add) ... ok
+test_add_negative_numbers (test_interpreter.TestInterpreter.test_add_negative_numbers) ... ok
+test_add_operator (test_interpreter.TestInterpreter.test_add_operator) ... ok
+test_evaluate_simple_arithmetic (test_interpreter.TestInterpreter.test_evaluate_simple_arithmetic) ... ok
+test_print_string (test_interpreter.TestInterpreter.test_print_string) ... ok
+test_parse_empty_input (test_parse.TestParser.test_parse_empty_input) ... ok
+test_parse_nested_parens (test_parse.TestParser.test_parse_nested_parens) ... ok
+test_parse_print_number (test_parse.TestParser.test_parse_print_number) ... ok
+test_parse_print_string (test_parse.TestParser.test_parse_print_string) ... ok
+test_print_empty_string (test_print.TestReplPrint.test_print_empty_string)
+(print "") outputs nothing ... ok
+test_print_missing_paren (test_print.TestReplPrint.test_print_missing_paren)
+(print "hello" raises error ... ok
+test_print_number (test_print.TestReplPrint.test_print_number)
+(print 42) outputs '42' ... ok
+test_print_string (test_print.TestReplPrint.test_print_string)
+(print "hello") outputs 'hello' ... ok
+test_print_unmatched_quotes (test_print.TestReplPrint.test_print_unmatched_quotes)
+(print "hello) raises error ... ok
+test_print_with_spaces (test_print.TestReplPrint.test_print_with_spaces)
+(print "a b c") outputs 'a b c' ... ok
+test_append (test_table.TestTable.test_append) ... ok
+test_define_automatic_extend (test_table.TestTable.test_define_automatic_extend) ... ok
+test_eval_special_form (test_table.TestTable.test_eval_special_form) ... ok
+test_lazy_table_literal (test_table.TestTable.test_lazy_table_literal) ... ok
+test_meta_table_fallback (test_table.TestTable.test_meta_table_fallback) ... ok
+test_setitem_map (test_table.TestTable.test_setitem_map) ... ok
+test_setitem_map_missing (test_table.TestTable.test_setitem_map_missing) ... ok
+test_table_elements_and_map (test_table.TestTable.test_table_elements_and_map) ... ok
+test_table_literal_parsing (test_table.TestTable.test_table_literal_parsing) ... ok
+test_tokenize_empty_input (test_tokenize.TestTokenize.test_tokenize_empty_input) ... ok
+test_tokenize_empty_string (test_tokenize.TestTokenize.test_tokenize_empty_string) ... ok
+test_tokenize_missing_closing_paren (test_tokenize.TestTokenize.test_tokenize_missing_closing_paren) ... ok
+test_tokenize_negative_number (test_tokenize.TestTokenize.test_tokenize_negative_number) ... ok
+test_tokenize_print_number (test_tokenize.TestTokenize.test_tokenize_print_number) ... ok
+test_tokenize_print_string (test_tokenize.TestTokenize.test_tokenize_print_string) ... ok
+test_tokenize_unmatched_quotes (test_tokenize.TestTokenize.test_tokenize_unmatched_quotes) ... ok
+test_tokenize_with_spaces (test_tokenize.TestTokenize.test_tokenize_with_spaces) ... ok
+
+----------------------------------------------------------------------
+Ran 32 tests in 0.003s
+
+OK
+Add eval <TableNode> : and implement test_eval_special_form test :)
+Add eval <TableNode> : and implement test_lazy_table_literal this test :)

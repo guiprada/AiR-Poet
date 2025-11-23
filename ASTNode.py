@@ -70,7 +70,7 @@ class CallExpressionNode(ASTNode):
         return len(self.arguments)
 
 class TableNode(ASTNode):
-    def __init__(self, elements=None, map=None, meta_table=None):
+    def __init__(self, elements: list[ASTNode] | None = None, map: dict[str, ASTNode] | None = None, meta_table: TableNode | None = None) -> None:
         self.elements = elements or []
         self.map = map or {}
         self._meta_table = meta_table
@@ -84,7 +84,7 @@ class TableNode(ASTNode):
     def __repr__(self):
         elements_repr = [repr(item) for item in self.elements]
         map_repr = {k: repr(v) for k, v in self.map.items()}
-        return f"TableLiteral(elements{elements_repr}, map={map_repr})"
+        return f"TableNode(elements={elements_repr}, map={map_repr})"
 
     def __contains__(self, key):
         if isinstance(key, int):
@@ -92,13 +92,13 @@ class TableNode(ASTNode):
             if 0 <= key < len(self.elements):
                 return True
             elif self._meta_table is not None:
-                return self._meta_table[key]
+                return key in self._meta_table
         else:
             # For string keys, check map and meta table
             if key in self.map:
                 return True
             if self._meta_table is not None:
-                return self._meta_table[key]
+                return key in self._meta_table
 
         return False
 
@@ -138,11 +138,6 @@ class TableNode(ASTNode):
 
             raise KeyError(f"Table.__setitem__ - Key {key} not found")
 
-    def __repr__(self):
-        elements_repr = [repr(item) for item in self.elements]
-        map_repr = {k: repr(v) for k, v in self.map.items()}
-        return f"Table(elements={elements_repr}, map={map_repr})"
-
     def define(self, key, value):
         if isinstance(key, int):
             while len(self.elements) <= key:
@@ -153,3 +148,10 @@ class TableNode(ASTNode):
 
     def append(self, value):
         self.elements.append(value)
+
+    def eval(self, env: TableNode | None = None):
+        """
+        For now, a table evaluates to itself (lazy evaluation).
+        The `env` parameter is kept for future use (e.g. a REPL).
+        """
+        return self

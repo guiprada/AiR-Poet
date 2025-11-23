@@ -17,14 +17,14 @@ class TestTable(unittest.TestCase):
                 'b': NumberNode('20')
             }
         )
-        self.assertEqual(t[0], NumberNode('1'))
-        self.assertEqual(t['a'], NumberNode('10'))
+        self.assertEqual(t[0].value, 1)
+        self.assertEqual(t['a'].value, 10)
 
     def test_meta_table_fallback(self):
         meta = TableNode(
             [
                 None, None, NumberNode('2')
-                ],
+            ],
             {
                 'x': NumberNode('99'),
                 '2': StringNode('2')
@@ -36,10 +36,10 @@ class TestTable(unittest.TestCase):
             ],
             meta_table=meta
         )
-        self.assertEqual(t[1], NumberNode('2'))
-        self.assertEqual(t[2], NumberNode('2'))
-        self.assertEqual(t['2'], StringNode('2'))
-        self.assertEqual(t['x'], NumberNode('99'))
+        self.assertEqual(t[1].value, 2)
+        self.assertEqual(t[2].value, 2)
+        self.assertEqual(t['2'].value, '2')
+        self.assertEqual(t['x'].value, 99)
 
     def test_setitem_map(self):
         # Updated to use a literal node for the initial value
@@ -50,7 +50,7 @@ class TestTable(unittest.TestCase):
             }
         )
         t['x'] = NumberNode('42')
-        self.assertEqual(t['x'], NumberNode('42'))
+        self.assertEqual(t['x'].value, 42)
 
     def test_setitem_map_missing(self):
         t = TableNode()
@@ -61,12 +61,12 @@ class TestTable(unittest.TestCase):
         t = TableNode()
         t.define(3, NumberNode('99'))                  # extends to index 3
         self.assertEqual(len(t.elements), 4)
-        self.assertEqual(t[3], NumberNode('99'))
+        self.assertEqual(t[3].value, 99)
 
     def test_append(self):
         t = TableNode()
         t.append(NumberNode('7'))
-        self.assertEqual(t[0], NumberNode('7'))
+        self.assertEqual(t[0].value, 7)
 
     # ##### Parser & tokenizer #####
     def test_table_literal_parsing(self):
@@ -76,16 +76,16 @@ class TestTable(unittest.TestCase):
         self.assertIsInstance(ast, TableNode)
         self.assertEqual(len(ast.elements), 5)
         self.assertIn('b', ast.map)
-        self.assertEqual(ast.map['b'], NumberNode('5'))
+        self.assertEqual(ast.map['b'].value, 5)
         self.assertNotIn(2, ast.map)
-        self.assertEqual(ast.elements[2], StringNode('a'))
-        self.assertEqual(ast.elements[3], NumberNode('3'))
-        self.assertEqual(ast.elements[4], NumberNode('4'))
+        self.assertEqual(ast.elements[2].value, 'a')
+        self.assertEqual(ast.elements[3].value, 3)
+        self.assertEqual(ast.elements[4].value, 4)
 
     # ##### Lazy eval of table literal #####
     def test_lazy_table_literal(self):
         #STUB
-        print('Add eval <TableNode> : and fill this test :)')
+        print('Add eval <TableNode> : and implement test_lazy_table_literal this test :)')
         # src = '{ "foo" : 1 + 1, 2 }'
         # tokens = tokenize(src)
         # ast = parse(tokens)
@@ -100,7 +100,7 @@ class TestTable(unittest.TestCase):
     # ##### Special form #eval# #####
     def test_eval_special_form(self):
         #STUB
-        print('Add eval <TableNode> : and fill this test :)')
+        print('Add eval <TableNode> : and implement test_eval_special_form test :)')
         # eval({ 1 : 2 }) # should evaluate to itself
         # src = 'eval { 1 : 2 }'
         # tokens = tokenize(src)

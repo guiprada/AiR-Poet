@@ -25,26 +25,6 @@ def load_file(file_path: str):
     except Exception as e:
         raise ValueError(f"Error parsing file '{file_path}': {e}") from e
 
-# def eval_table(table: Table, env: Table):
-#     # Create a new environment for this evaluation context
-#     eval_env = Table(meta_table = env)
-
-#     # First, evaluate all positional items
-#     evaluated_list = []
-#     for item in table.elements:
-#         evaluated_list.append(interpret(item, eval_env))
-
-#     # Then, evaluate all named items
-#     evaluated_dict = {}
-#     for key, value in table.map.items():
-#         evaluated_dict[key] = interpret(value, eval_env)
-
-#     # Handle special forms (if:, init:, cond:, loop:, etc.)
-#     # This is where you'd implement the t-exp special forms
-
-#     # For now, return a runtime Table object
-#     return None
-
 def interpret(ast: ASTNode, env: TableNode):
     if isinstance(ast, NumberNode):
         return ast.value

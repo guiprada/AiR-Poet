@@ -3,8 +3,8 @@ TODO
   * First implement a basic TableLiteral AST node and parsing support?
   * Then create a Table runtime value that can serve as both data structure and environment?
   * Finally, make Environment either inherit from or wrap the Table type?
+  * TableNode should be map: dict[ASTNode, ASTNode]
   - eval <Table>
-  - TableNode should be map: dict[str, ASTNode]
 
 - Add support for tokenizing negative numbers. Extend the numeric tokenizer to consume a leading - only if it?s part of a number. A common trick: when you see -, look?ahead to see if the next character is a digit; if so, start a negative number token.
 - Add an environment dict that maps names to values. In interpret, first check env before falling back to prelude.

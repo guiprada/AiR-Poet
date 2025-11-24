@@ -1,3 +1,13 @@
+test_call_expression_node_hash (test_ast_node_hashes.TestASTNodeHashing.test_call_expression_node_hash) ... ok
+test_empty_string_node_hash (test_ast_node_hashes.TestASTNodeHashing.test_empty_string_node_hash) ... ok
+test_hash_performance_for_large_ast (test_ast_node_hashes.TestASTNodeHashing.test_hash_performance_for_large_ast) ... ok
+test_hash_stability (test_ast_node_hashes.TestASTNodeHashing.test_hash_stability) ... ok
+test_hash_type_safety (test_ast_node_hashes.TestASTNodeHashing.test_hash_type_safety) ... ok
+test_identifier_node_hash (test_ast_node_hashes.TestASTNodeHashing.test_identifier_node_hash) ... ok
+test_number_node_hash (test_ast_node_hashes.TestASTNodeHashing.test_number_node_hash) ... ok
+test_special_characters_in_string_node (test_ast_node_hashes.TestASTNodeHashing.test_special_characters_in_string_node) ... ok
+test_string_node_hash (test_ast_node_hashes.TestASTNodeHashing.test_string_node_hash) ... ok
+test_table_node_hash (test_ast_node_hashes.TestASTNodeHashing.test_table_node_hash) ... ok
 test_add (test_interpreter.TestInterpreter.test_add) ... ok
 test_add_negative_numbers (test_interpreter.TestInterpreter.test_add_negative_numbers) ... ok
 test_add_operator (test_interpreter.TestInterpreter.test_add_operator) ... ok
@@ -19,15 +29,15 @@ test_print_unmatched_quotes (test_print.TestReplPrint.test_print_unmatched_quote
 (print "hello) raises error ... ok
 test_print_with_spaces (test_print.TestReplPrint.test_print_with_spaces)
 (print "a b c") outputs 'a b c' ... ok
-test_append (test_table.TestTable.test_append) ... ok
-test_define_automatic_extend (test_table.TestTable.test_define_automatic_extend) ... ok
-test_eval_special_form (test_table.TestTable.test_eval_special_form) ... ok
-test_lazy_table_literal (test_table.TestTable.test_lazy_table_literal) ... ok
-test_meta_table_fallback (test_table.TestTable.test_meta_table_fallback) ... ok
-test_setitem_map (test_table.TestTable.test_setitem_map) ... ok
-test_setitem_map_missing (test_table.TestTable.test_setitem_map_missing) ... ok
-test_table_elements_and_map (test_table.TestTable.test_table_elements_and_map) ... ok
-test_table_literal_parsing (test_table.TestTable.test_table_literal_parsing) ... ok
+test_append (test_table_node.TestTable.test_append) ... ok
+test_define_automatic_extend (test_table_node.TestTable.test_define_automatic_extend) ... ok
+test_eval_special_form (test_table_node.TestTable.test_eval_special_form) ... ok
+test_lazy_table_literal (test_table_node.TestTable.test_lazy_table_literal) ... ok
+test_meta_table_fallback (test_table_node.TestTable.test_meta_table_fallback) ... ok
+test_setitem_map (test_table_node.TestTable.test_setitem_map) ... ok
+test_setitem_map_missing (test_table_node.TestTable.test_setitem_map_missing) ... ok
+test_table_elements_and_map (test_table_node.TestTable.test_table_elements_and_map) ... ok
+test_table_literal_parsing (test_table_node.TestTable.test_table_literal_parsing) ... ok
 test_tokenize_empty_input (test_tokenize.TestTokenize.test_tokenize_empty_input) ... ok
 test_tokenize_empty_string (test_tokenize.TestTokenize.test_tokenize_empty_string) ... ok
 test_tokenize_missing_closing_paren (test_tokenize.TestTokenize.test_tokenize_missing_closing_paren) ... ok
@@ -38,7 +48,7 @@ test_tokenize_unmatched_quotes (test_tokenize.TestTokenize.test_tokenize_unmatch
 test_tokenize_with_spaces (test_tokenize.TestTokenize.test_tokenize_with_spaces) ... ok
 
 ----------------------------------------------------------------------
-Ran 32 tests in 0.003s
+Ran 42 tests in 0.009s
 
 OK
 Add eval <TableNode> : and implement test_eval_special_form test :)

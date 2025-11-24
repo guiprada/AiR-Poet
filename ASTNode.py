@@ -14,6 +14,9 @@ class IdentifierNode(ASTNode):
     def __repr__(self):
         return f"IdentifierNode({self.value})"
 
+    def __hash__(self):
+        return hash(f"IN{self.value}")
+
 class StringNode(ASTNode):
     def __init__(self, value: str):
         if not isinstance(value, str):
@@ -25,6 +28,9 @@ class StringNode(ASTNode):
 
     def __repr__(self):
         return f"StringNode({self.value})"
+
+    def __hash__(self):
+        return hash(f"SN{self.value}")
 
 class NumberNode(ASTNode):
     @staticmethod
@@ -49,8 +55,12 @@ class NumberNode(ASTNode):
     def __repr__(self):
         return f"NumberNode({self.value})"
 
+    def __hash__(self):
+        return hash(f"NN{self.value}{self.type}")
+        # return hash(f"NN{repr(self.value)}")
+
 class CallExpressionNode(ASTNode):
-    def __init__(self, callee: ASTNode, arguments: list):
+    def __init__(self, callee: ASTNode, arguments: list[ASTNode]):
         if not isinstance(callee, ASTNode):
             raise ValueError("Parser - CallExpressionNode.callee must be an ASTNode")
         if not isinstance(arguments, list):
@@ -69,8 +79,11 @@ class CallExpressionNode(ASTNode):
     def arity(self):
         return len(self.arguments)
 
+    def __hash__(self): # is this sane?
+        return hash(f"CN{self.callee}{tuple(arg for arg in self.arguments)}")
+
 class TableNode(ASTNode):
-    def __init__(self, elements: list[ASTNode] | None = None, map: dict[str, ASTNode] | None = None, meta_table: TableNode | None = None) -> None:
+    def __init__(self, elements: list[ASTNode] | None = None, map: dict[ASTNode, ASTNode] | None = None, meta_table: TableNode | None = None) -> None:
         self.elements = elements or []
         self.map = map or {}
         self._meta_table = meta_table
@@ -83,68 +96,69 @@ class TableNode(ASTNode):
 
     def __repr__(self):
         elements_repr = [repr(item) for item in self.elements]
-        map_repr = {k: repr(v) for k, v in self.map.items()}
+        map_repr = {repr(k): repr(v) for k, v in self.map.items()}
         return f"TableNode(elements={elements_repr}, map={map_repr})"
 
-    def __contains__(self, key):
-        if isinstance(key, int):
-            # For integer keys, check if it's within bounds
-            if 0 <= key < len(self.elements):
+    def __hash__(self):
+        return hash(f"TN{tuple(elem for elem in self.elements)}{tuple((k, v) for k, v in self.map.items())}")
+
+    def __contains__(self, key:ASTNode):
+        if isinstance(key, NumberNode):
+            if 0 <= key.value < len(self.elements):
                 return True
             elif self._meta_table is not None:
                 return key in self._meta_table
-        else:
-            # For string keys, check map and meta table
+        elif isinstance(key, ASTNode):
             if key in self.map:
                 return True
             if self._meta_table is not None:
                 return key in self._meta_table
-
         return False
 
-    def __getitem__(self, key):
-        if isinstance(key, int):
-            if 0 <= key < len(self.elements):
-                return self.elements[key]
+    def __getitem__(self, key:ASTNode):
+        if isinstance(key, NumberNode):
+            if 0 <= key.value < len(self.elements):
+                return self.elements[key.value]
             elif self._meta_table is not None:
                 return self._meta_table[key]
-
             raise KeyError(f"Table.__getitem__ - Positional key {key} out of range")
-        else:
+        elif isinstance(key, ASTNode):
             if key in self.map:
                 return self.map[key]
             elif self._meta_table is not None:
                 return self._meta_table[key]
-
             raise KeyError(f"Table.__getitem__ - Key {key} not found")
+        raise KeyError(f"Table.__getitem__ - Key {key} is not an ASTNode")
 
-    def __setitem__(self, key, value):
-        if isinstance(key, int):
-            if 0 <= key < len(self.elements):
-                self.elements[key] = value
+    def __setitem__(self, key:ASTNode, value:ASTNode):
+        if isinstance(key, NumberNode):
+            if 0 <= key.value < len(self.elements):
+                self.elements[key.value] = value
                 return
             elif self._meta_table is not None:
                 self._meta_table[key] = value
                 return
-
             raise KeyError(f"Table.__setitem__ - Positional key {key} out of range")
-        else:
+        elif isinstance(key, ASTNode):
             if key in self.map:
                 self.map[key] = value
                 return
             elif self._meta_table is not None:
                 self._meta_table[key] = value
                 return
-
             raise KeyError(f"Table.__setitem__ - Key {key} not found")
+        raise KeyError(f"Table.__setitem__ - Key {key} is not an ASTNode")
 
-    def define(self, key, value):
-        if isinstance(key, int):
-            while len(self.elements) <= key:
+    def define(self, key:ASTNode, value:ASTNode):
+        if isinstance(key, NumberNode):
+            while len(self.elements) <= key.value:
                 self.elements.append(None)
-            self.elements[key] = value
-        else:
+            self.elements[key.value] = value
+        elif isinstance(key, ASTNode):
             self.map[key] = value
+        else:
+            raise TypeError("Table.define - Key {key} is not an ASTNode")
+
 
     def append(self, value):
         self.elements.append(value)

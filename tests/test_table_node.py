@@ -13,12 +13,12 @@ class TestTable(unittest.TestCase):
                 NumberNode('1'), NumberNode('2'), NumberNode('3')
             ],
             {
-                'a': NumberNode('10'),
-                'b': NumberNode('20')
+                StringNode('a'): NumberNode('10'),
+                StringNode('b'): NumberNode('20')
             }
         )
-        self.assertEqual(t[0].value, 1)
-        self.assertEqual(t['a'].value, 10)
+        self.assertEqual(t[NumberNode('0')].value, 1)
+        self.assertEqual(t[StringNode('a')].value, 10)
 
     def test_meta_table_fallback(self):
         meta = TableNode(
@@ -26,9 +26,9 @@ class TestTable(unittest.TestCase):
                 None, None, NumberNode('2')
             ],
             {
-                'x': NumberNode('99'),
-                '2': StringNode('2')
-                }
+                StringNode('x'): NumberNode('99'),
+                StringNode('2'): StringNode('2')
+            }
         )
         t = TableNode(
             [
@@ -36,48 +36,48 @@ class TestTable(unittest.TestCase):
             ],
             meta_table=meta
         )
-        self.assertEqual(t[1].value, 2)
-        self.assertEqual(t[2].value, 2)
-        self.assertEqual(t['2'].value, '2')
-        self.assertEqual(t['x'].value, 99)
+        self.assertEqual(t[NumberNode('1')].value, 2)
+        self.assertEqual(t[NumberNode('2')].value, 2)
+        self.assertEqual(t[StringNode('2')].value, '2')
+        self.assertEqual(t[StringNode('x')].value, 99)
 
     def test_setitem_map(self):
         # Updated to use a literal node for the initial value
         t = TableNode(
             [],
             {
-                'x': NumberNode('5')
+                StringNode('x'): NumberNode('5')
             }
         )
-        t['x'] = NumberNode('42')
-        self.assertEqual(t['x'].value, 42)
+        t[StringNode('x')] = NumberNode('42')
+        self.assertEqual(t[StringNode('x')].value, 42)
 
     def test_setitem_map_missing(self):
         t = TableNode()
         with self.assertRaises(KeyError):
-            t['missing'] = NumberNode('123')          # should raise
+            t[StringNode('missing')] = NumberNode('123')          # should raise
 
     def test_define_automatic_extend(self):
         t = TableNode()
-        t.define(3, NumberNode('99'))                  # extends to index 3
+        t.define(NumberNode('3'), NumberNode('99'))                  # extends to index 3
         self.assertEqual(len(t.elements), 4)
-        self.assertEqual(t[3].value, 99)
+        self.assertEqual(t[NumberNode('3')].value, 99)
 
     def test_append(self):
         t = TableNode()
         t.append(NumberNode('7'))
-        self.assertEqual(t[0].value, 7)
+        self.assertEqual(t[NumberNode('0')].value, 7)
 
     # ##### Parser & tokenizer #####
     def test_table_literal_parsing(self):
-        src = '{1 2 : "a" 3 4, b : 5 }'
+        src = '{1 2 : "a" 3 4, "b" : 5 }'
         tokens = tokenize(src)
         ast = parse(tokens)
         self.assertIsInstance(ast, TableNode)
         self.assertEqual(len(ast.elements), 5)
-        self.assertIn('b', ast.map)
-        self.assertEqual(ast.map['b'].value, 5)
-        self.assertNotIn(2, ast.map)
+        self.assertIn(StringNode('b'), ast.map)
+        self.assertEqual(ast.map[StringNode('b')].value, 5)
+        self.assertNotIn(NumberNode('2'), ast.map)
         self.assertEqual(ast.elements[2].value, 'a')
         self.assertEqual(ast.elements[3].value, 3)
         self.assertEqual(ast.elements[4].value, 4)

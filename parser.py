@@ -25,8 +25,6 @@ def parse_table(tokens, pos):
             if not isinstance(item, (IdentifierNode, StringNode, NumberNode)):
                 raise ValueError(f"Table key must be identifier, string, or number at position {pos}")
 
-            # Get the key name
-            key = item.value if hasattr(item, 'value') else str(item)
             pos += 1  # Skip ':'
 
             # Parse the value
@@ -37,7 +35,7 @@ def parse_table(tokens, pos):
 
                 elements[item.value] = value
             else:
-                map[key] = value
+                map[item] = value
         else:
             # This is a positional item
             elements.append(item)

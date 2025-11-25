@@ -1,13 +1,23 @@
+test_call_expression_hash (test_ast_node_hashes.TestASTNodeHashing.test_call_expression_hash) ... ok
 test_call_expression_node_hash (test_ast_node_hashes.TestASTNodeHashing.test_call_expression_node_hash) ... ok
+test_empty_nodes (test_ast_node_hashes.TestASTNodeHashing.test_empty_nodes) ... ok
 test_empty_string_node_hash (test_ast_node_hashes.TestASTNodeHashing.test_empty_string_node_hash) ... ok
-test_hash_performance_for_large_ast (test_ast_node_hashes.TestASTNodeHashing.test_hash_performance_for_large_ast) ... ok
+test_hash_collision_resistance (test_ast_node_hashes.TestASTNodeHashing.test_hash_collision_resistance) ... ok
+test_hash_performance_consistency (test_ast_node_hashes.TestASTNodeHashing.test_hash_performance_consistency) ... ok
+test_hash_performance_multiple_sizes (test_ast_node_hashes.TestASTNodeHashing.test_hash_performance_multiple_sizes) ... ok
 test_hash_stability (test_ast_node_hashes.TestASTNodeHashing.test_hash_stability) ... ok
+test_hash_type_combinations (test_ast_node_hashes.TestASTNodeHashing.test_hash_type_combinations) ... ok
 test_hash_type_safety (test_ast_node_hashes.TestASTNodeHashing.test_hash_type_safety) ... ok
 test_identifier_node_hash (test_ast_node_hashes.TestASTNodeHashing.test_identifier_node_hash) ... ok
+test_individual_node_hashing (test_ast_node_hashes.TestASTNodeHashing.test_individual_node_hashing) ... ok
+test_large_number_hashing (test_ast_node_hashes.TestASTNodeHashing.test_large_number_hashing) ... ok
+test_nested_call_expression (test_ast_node_hashes.TestASTNodeHashing.test_nested_call_expression) ... ok
 test_number_node_hash (test_ast_node_hashes.TestASTNodeHashing.test_number_node_hash) ... ok
 test_special_characters_in_string_node (test_ast_node_hashes.TestASTNodeHashing.test_special_characters_in_string_node) ... ok
 test_string_node_hash (test_ast_node_hashes.TestASTNodeHashing.test_string_node_hash) ... ok
+test_table_hash (test_ast_node_hashes.TestASTNodeHashing.test_table_hash) ... ok
 test_table_node_hash (test_ast_node_hashes.TestASTNodeHashing.test_table_node_hash) ... ok
+test_unicode_escape_sequences (test_ast_node_hashes.TestASTNodeHashing.test_unicode_escape_sequences) ... ok
 test_add (test_interpreter.TestInterpreter.test_add) ... ok
 test_add_negative_numbers (test_interpreter.TestInterpreter.test_add_negative_numbers) ... ok
 test_add_operator (test_interpreter.TestInterpreter.test_add_operator) ... ok
@@ -48,7 +58,7 @@ test_tokenize_unmatched_quotes (test_tokenize.TestTokenize.test_tokenize_unmatch
 test_tokenize_with_spaces (test_tokenize.TestTokenize.test_tokenize_with_spaces) ... ok
 
 ----------------------------------------------------------------------
-Ran 42 tests in 0.009s
+Ran 52 tests in 0.051s
 
 OK
 Add eval <TableNode> : and implement test_eval_special_form test :)

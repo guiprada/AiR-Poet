@@ -4,6 +4,7 @@ TODO
   * Then create a Table runtime value that can serve as both data structure and environment?
   * Finally, make Environment either inherit from or wrap the Table type?
   * TableNode should be map: dict[ASTNode, ASTNode]
+  - Stripping quotes in strings should be in the parser or tokenizer? Implement proper string unescaping, multiline strings and escaped strings
   - eval <Table>
 
 - Add support for tokenizing negative numbers. Extend the numeric tokenizer to consume a leading - only if it?s part of a number. A common trick: when you see -, look?ahead to see if the next character is a digit; if so, start a negative number token.

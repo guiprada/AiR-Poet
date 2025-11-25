@@ -15,7 +15,7 @@ class IdentifierNode(ASTNode):
         return f"IdentifierNode({self.value})"
 
     def __hash__(self):
-        return hash(f"IN{self.value}")
+        return hash((type(self).__name__,self.value))
 
 class StringNode(ASTNode):
     def __init__(self, value: str):
@@ -30,7 +30,7 @@ class StringNode(ASTNode):
         return f"StringNode({self.value})"
 
     def __hash__(self):
-        return hash(f"SN{self.value}")
+        return hash((type(self).__name__, self.value))
 
 class NumberNode(ASTNode):
     @staticmethod
@@ -56,8 +56,7 @@ class NumberNode(ASTNode):
         return f"NumberNode({self.value})"
 
     def __hash__(self):
-        return hash(f"NN{self.value}{self.type}")
-        # return hash(f"NN{repr(self.value)}")
+        return hash((type(self).__name__, repr(self.value)))
 
 class CallExpressionNode(ASTNode):
     def __init__(self, callee: ASTNode, arguments: list[ASTNode]):
@@ -79,8 +78,8 @@ class CallExpressionNode(ASTNode):
     def arity(self):
         return len(self.arguments)
 
-    def __hash__(self): # is this sane?
-        return hash(f"CN{self.callee}{tuple(arg for arg in self.arguments)}")
+    def __hash__(self):
+        return hash((type(self).__name__, self.callee, tuple(self.arguments)))
 
 class TableNode(ASTNode):
     def __init__(self, elements: list[ASTNode] | None = None, map: dict[ASTNode, ASTNode] | None = None, meta_table: TableNode | None = None) -> None:
@@ -100,7 +99,7 @@ class TableNode(ASTNode):
         return f"TableNode(elements={elements_repr}, map={map_repr})"
 
     def __hash__(self):
-        return hash(f"TN{tuple(elem for elem in self.elements)}{tuple((k, v) for k, v in self.map.items())}")
+        return hash((type(self).__name__, tuple(self.elements), frozenset(self.map.items())))
 
     def __contains__(self, key:ASTNode):
         if isinstance(key, NumberNode):

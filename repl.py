@@ -18,11 +18,11 @@ Example:
 from tokenizer import tokenize
 from parser import parse
 from interpreter import interpret, load_file
-from air_types import Table
+from ASTNode import TableNode
 
 def main():
     print("Table Scheme REPL. Type 'exit' to quit.")
-    env = Table()
+    env = TableNode()
     while True:
         try:
             line = input(">>> ")

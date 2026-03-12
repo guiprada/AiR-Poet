@@ -1,6 +1,6 @@
 from parser import parse
 from tokenizer import tokenize
-from ASTNode import ASTNode, TableNode, CallExpressionNode, NumberNode, StringNode, TableNode, IdentifierNode
+from ASTNode import ASTNode, TableNode, CallExpressionNode, NumberNode, StringNode, IdentifierNode
 
 # A single lookup table that contains *all* prelude callables.
 # Operators are mapped directly to the function objects.

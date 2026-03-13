@@ -16,8 +16,8 @@ Example:
     Bye!
 """
 from tokenizer import tokenize
-from parser import parse
-from interpreter import interpret, load_file
+from parser import parse, parse_program
+from interpreter import interpret, interpret_program, load_file
 from ASTNode import TableNode
 
 def main():
@@ -33,8 +33,9 @@ def main():
             path = line[4:].strip()
             try:
                 ast = load_file(path)
-                result = interpret(ast, env)
-                print(result)
+                result = interpret_program(ast, env)
+                if result is not None:
+                    print(result)
             except Exception as e:
                 print(f"REPL error: {e}")
             continue
@@ -46,8 +47,10 @@ def main():
             break
         try:
             tokens = tokenize(line)
-            ast = parse(tokens)
-            interpret(ast, env)
+            ast = parse_program(tokens)
+            result = interpret_program(ast, env)
+            if result is not None:
+                print(result)
         except Exception as e:
             print(f"REPL error: {e}")
 

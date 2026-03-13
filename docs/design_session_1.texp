@@ -1,0 +1,152 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// AiR-Poet Language Design — Session 1
+// Table Scheme: Core Principles
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── CORE ARCHITECTURE ────────────────────────────────────────────────────────
+//
+//  Two co-equal syntaxes, one shared environment:
+//
+//    {…}   table  — lazy, data + env + code block
+//    (…)   Lisp   — eager, built-in interpreter (no desugaring needed)
+//
+//  A file IS an implicit top-level table.
+//  Named entries at top level are "exports". Positional entries are statements.
+//
+//  WIDCL — When In Doubt, Choose Lua.
+
+// ── EVALUATION SEMANTICS ─────────────────────────────────────────────────────
+//
+//  Tables are LAZY by default. Evaluating a table:
+//    1. Creates a child env (the table IS the env)
+//    2. Evaluates entries TOP-DOWN (WIDCL — strict left-to-right order)
+//    3. Named entry  key: val  → evaluates val, binds key in child env
+//    4. Positional entry  val  → evaluates val as statement
+//    5. Returns last value (like a stack language)
+//
+//  Trigger eval explicitly:
+//    <:expr       — table eval prefix operator
+//    (eval expr)  — Lisp form, same semantics
+
+// ── SYNTAX: TABLE LITERALS ───────────────────────────────────────────────────
+
+x: 5
+name: "Alice"
+
+t: {
+    'a'           // positional [0] — symbol literal
+    a: 1          // named entry
+    b: 2
+    c: "oba"
+    x             // positional [1] — resolved to 5 when evaled
+}
+
+// access:
+// t[0]      → 'a'
+// t[1]      → 5
+// t.a       → 1
+// t["b"]    → 2
+// t.c       → "oba"
+
+// ── SYNTAX: TABLE AS BLOCK ───────────────────────────────────────────────────
+
+greeting: {
+    msg: (+ "Hello " name)   // Lisp expr as value — eager
+    msg                      // return: last positional entry
+}
+
+<:greeting           // → "Hello Alice"
+(eval greeting)      // same thing, Lisp form
+
+// ── SYNTAX: TABLE AS FUNCTION ────────────────────────────────────────────────
+//
+//  A function is a table stored in a variable.
+//  Parameters are named entries the caller fills in.
+//  The arg table is merged into a new child env before eval.
+
+double: {
+    result: (* n 2)   // n comes from caller's arg table
+    result
+}
+
+double{ n: 3 }        // table call syntax  → 6
+(double 3)            // Lisp call syntax   → 6  (positional: n = args[0])
+
+// ── CALL SYNTAX MATRIX ───────────────────────────────────────────────────────
+//
+//  double{ n: 3 }        native table call, named params
+//  double(n: 3)          legacy ergonomic syntax, named params (same semantics)
+//  double({n: 3})        positional legacy: double receives {n:3} at args[0]
+//  (double {n: 3})       Lisp call with table as argument
+//  (double 3)            Lisp call, positional
+
+// ── SPECIAL FORMS ────────────────────────────────────────────────────────────
+//
+//  A table with a recognized special-form key gets tagged at parse/first-eval.
+//  Tag is stored in ONE meta_table per table — users don't touch it directly.
+//  set-tag! is the public API for metaprogramming.
+//
+//  Known special form keys:  if:  then:  else:  init:  cond:  loop:
+
+{
+    if:   (> x 1)
+    then: (+ x 1)
+    else: (- x 2)
+}
+// x = 6 after eval  (was 5)
+
+{
+    init: { i: 0 }
+    cond: (<= i 5)
+    loop: {
+        (print i)
+        i: (+ i 1)
+    }
+}
+// prints 0 1 2 3 4 5
+
+// ── QUOTING ──────────────────────────────────────────────────────────────────
+//
+//  (…) is eager. To store a Lisp expression unevaluated, quote it:
+//
+//    f: '(+ 1 2)      stores the list (+ 1 2) — not evaluated
+//    f: (+ 1 2)       stores 3 — evaluated immediately
+//
+//  {…} is already lazy — no quoting needed for tables.
+
+// ── METAPROGRAMMING ──────────────────────────────────────────────────────────
+//
+//  Special form detection happens at parse time (= first eval, same thing now).
+//  To build a data table that happens to have if: as a key:
+//
+//    t: {
+//        type: :data       // explicit meta-key overrides auto-detection
+//        if: somevalue
+//    }
+//
+//  Or imperatively, after construction:
+//    (set-tag! t :data)
+//
+//  Metaprogramming is first-class. When you hold the table, you own the control.
+
+// ── FILE AS MODULE ───────────────────────────────────────────────────────────
+//
+//  A .texp file IS a table. Named top-level entries are exports.
+//
+//    // mymodule.texp
+//    x: 5
+//    name: "Alice"
+//    double: { result: (* n 2)  result }
+//
+//    // main.texp
+//    m: (load "mymodule.texp")
+//    (print m.x)            // 5
+//    m.double{ n: 4 }       // 8
+
+// ── OPEN QUESTIONS (to resolve with sample code) ─────────────────────────────
+//
+//  Q1: double(n: 3) — allow key:val inside ()? → ergonomic but blurs Lisp/table
+//  Q2: Closure vs dynamic scoping for functions — defer until needed
+//  Q3: set vs define — : always creates local binding; mutation syntax TBD
+//  Q4: Comment syntax — // works in examples, tokenizer support pending
+//  Q5: Float literals 3.14 — tokenizer needs special handling for N.N pattern

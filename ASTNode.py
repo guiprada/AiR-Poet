@@ -7,7 +7,6 @@ class IdentifierNode(ASTNode):
     def __init__(self, value: str):
         if not isinstance(value, str) or not value:
             raise ValueError("Parser - IdentifierNode name must be a non-empty string")
-
         self.value = value
 
     def __eq__(self, other):
@@ -17,7 +16,8 @@ class IdentifierNode(ASTNode):
         return f"IdentifierNode({self.value})"
 
     def __hash__(self):
-        return hash((type(self).__name__,self.value))
+        return hash((type(self).__name__, self.value))
+
 
 class StringNode(ASTNode):
     def __init__(self, value: str):
@@ -34,6 +34,24 @@ class StringNode(ASTNode):
     def __hash__(self):
         return hash((type(self).__name__, self.value))
 
+
+class SymbolNode(ASTNode):
+    """A single-quoted symbol literal: 'a', 'hello'."""
+    def __init__(self, value: str):
+        if not isinstance(value, str):
+            raise ValueError("Parser - SymbolNode value must be a string")
+        self.value = value.strip("'")
+
+    def __eq__(self, other):
+        return isinstance(other, SymbolNode) and self.value == other.value
+
+    def __repr__(self):
+        return f"SymbolNode({self.value})"
+
+    def __hash__(self):
+        return hash((type(self).__name__, self.value))
+
+
 class NumberNode(ASTNode):
     @staticmethod
     def number_typing(value: str):
@@ -43,12 +61,11 @@ class NumberNode(ASTNode):
             try:
                 return float(value), "float"
             except ValueError:
-                raise ValueError("Parser - NumberNode value must be build from a int or float string")
+                raise ValueError("Parser - NumberNode value must be built from an int or float string")
 
     def __init__(self, value: str):
         if not isinstance(value, str):
-            raise ValueError("Parser - NumberNode value must be buildt from a string")
-
+            raise ValueError("Parser - NumberNode value must be built from a string")
         self.value, self.type = NumberNode.number_typing(value)
 
     def __eq__(self, other):
@@ -59,6 +76,7 @@ class NumberNode(ASTNode):
 
     def __hash__(self):
         return hash((type(self).__name__, repr(self.value)))
+
 
 class CallExpressionNode(ASTNode):
     def __init__(self, callee: ASTNode, arguments: list[ASTNode]):
@@ -83,17 +101,95 @@ class CallExpressionNode(ASTNode):
     def __hash__(self):
         return hash((type(self).__name__, self.callee, tuple(self.arguments)))
 
+
+class TableCallNode(ASTNode):
+    """fn{args} — call a table-function with a table of arguments."""
+    def __init__(self, callee: ASTNode, args: TableNode):
+        if not isinstance(callee, ASTNode):
+            raise ValueError("Parser - TableCallNode.callee must be an ASTNode")
+        self.callee = callee
+        self.args = args
+
+    def __eq__(self, other):
+        return isinstance(other, TableCallNode) and self.callee == other.callee and self.args == other.args
+
+    def __repr__(self):
+        return f"TableCallNode({self.callee}, {self.args})"
+
+    def __hash__(self):
+        return hash((type(self).__name__, self.callee, self.args))
+
+
+class IndexAccessNode(ASTNode):
+    """t[key] — index or key access on a table."""
+    def __init__(self, table: ASTNode, key: ASTNode):
+        if not isinstance(table, ASTNode):
+            raise ValueError("Parser - IndexAccessNode.table must be an ASTNode")
+        if not isinstance(key, ASTNode):
+            raise ValueError("Parser - IndexAccessNode.key must be an ASTNode")
+        self.table = table
+        self.key = key
+
+    def __eq__(self, other):
+        return isinstance(other, IndexAccessNode) and self.table == other.table and self.key == other.key
+
+    def __repr__(self):
+        return f"IndexAccessNode({self.table}, {self.key})"
+
+    def __hash__(self):
+        return hash((type(self).__name__, self.table, self.key))
+
+
+class FieldAccessNode(ASTNode):
+    """t.field — named field access on a table."""
+    def __init__(self, table: ASTNode, field: str):
+        if not isinstance(table, ASTNode):
+            raise ValueError("Parser - FieldAccessNode.table must be an ASTNode")
+        if not isinstance(field, str) or not field:
+            raise ValueError("Parser - FieldAccessNode.field must be a non-empty string")
+        self.table = table
+        self.field = field
+
+    def __eq__(self, other):
+        return isinstance(other, FieldAccessNode) and self.table == other.table and self.field == other.field
+
+    def __repr__(self):
+        return f"FieldAccessNode({self.table}, {self.field})"
+
+    def __hash__(self):
+        return hash((type(self).__name__, self.table, self.field))
+
+
+class EvalNode(ASTNode):
+    """<:expr — explicitly evaluate a table as code."""
+    def __init__(self, expr: ASTNode):
+        if not isinstance(expr, ASTNode):
+            raise ValueError("Parser - EvalNode.expr must be an ASTNode")
+        self.expr = expr
+
+    def __eq__(self, other):
+        return isinstance(other, EvalNode) and self.expr == other.expr
+
+    def __repr__(self):
+        return f"EvalNode({self.expr})"
+
+    def __hash__(self):
+        return hash((type(self).__name__, self.expr))
+
+
 class TableNode(ASTNode):
     def __init__(self, elements: list[ASTNode] | None = None, map: dict[ASTNode, ASTNode] | None = None, meta_table: TableNode | None = None) -> None:
         self.elements = elements or []
         self.map = map or {}
         self._meta_table = meta_table
+        # Ordered entries as parsed: list of (key: ASTNode | None, value: ASTNode)
+        # key=None means positional; used for top-down evaluation.
+        self.entries: list[tuple[ASTNode | None, ASTNode]] = []
 
     def __eq__(self, other):
         if not isinstance(other, TableNode):
             return False
-        return (self.elements == other.elements and
-                self.map == other.map)
+        return self.elements == other.elements and self.map == other.map
 
     def __repr__(self):
         elements_repr = [repr(item) for item in self.elements]
@@ -103,7 +199,7 @@ class TableNode(ASTNode):
     def __hash__(self):
         return hash((type(self).__name__, tuple(self.elements), frozenset(self.map.items())))
 
-    def __contains__(self, key:ASTNode):
+    def __contains__(self, key: ASTNode):
         if isinstance(key, NumberNode):
             if 0 <= key.value < len(self.elements):
                 return True
@@ -116,7 +212,7 @@ class TableNode(ASTNode):
                 return key in self._meta_table
         return False
 
-    def __getitem__(self, key:ASTNode):
+    def __getitem__(self, key: ASTNode):
         if isinstance(key, NumberNode):
             if 0 <= key.value < len(self.elements):
                 return self.elements[key.value]
@@ -131,7 +227,7 @@ class TableNode(ASTNode):
             raise KeyError(f"Table.__getitem__ - Key {key} not found")
         raise KeyError(f"Table.__getitem__ - Key {key} is not an ASTNode")
 
-    def __setitem__(self, key:ASTNode, value:ASTNode):
+    def __setitem__(self, key: ASTNode, value: ASTNode):
         if isinstance(key, NumberNode):
             if 0 <= key.value < len(self.elements):
                 self.elements[key.value] = value
@@ -150,7 +246,8 @@ class TableNode(ASTNode):
             raise KeyError(f"Table.__setitem__ - Key {key} not found")
         raise KeyError(f"Table.__setitem__ - Key {key} is not an ASTNode")
 
-    def define(self, key:ASTNode, value:ASTNode):
+    def define(self, key: ASTNode, value):
+        """Unconditionally bind key in THIS table (current scope)."""
         if isinstance(key, NumberNode):
             while len(self.elements) <= key.value:
                 self.elements.append(None)
@@ -158,15 +255,11 @@ class TableNode(ASTNode):
         elif isinstance(key, ASTNode):
             self.map[key] = value
         else:
-            raise TypeError("Table.define - Key {key} is not an ASTNode")
-
+            raise TypeError(f"Table.define - Key {key} is not an ASTNode")
 
     def append(self, value):
         self.elements.append(value)
 
     def eval(self, env: TableNode | None = None):
-        """
-        For now, a table evaluates to itself (lazy evaluation).
-        The `env` parameter is kept for future use (e.g. a REPL).
-        """
+        """Lazy by default — returns self. Use eval_table() in interpreter for active eval."""
         return self

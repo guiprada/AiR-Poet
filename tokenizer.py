@@ -5,9 +5,14 @@ ALLOWED_TOKEN_TYPES = {
     'rparen',
     'lbrace',
     'rbrace',
+    'lbracket',
+    'rbracket',
     'colon',
     'comma',
+    'dot',
+    'eval_op',   # <:
     'string',
+    'symbol',    # 'content'
     'number',
     'identifier',
 }
@@ -36,38 +41,70 @@ class Token:
     def __repr__(self):
         return f"Token({self.token_type}, {self.value}, ({self.line}, {self.column}))"
 
+
+# Characters that always terminate a token when scanning forward
+_STOP_CHARS = set('(){}[].,:<')
+
+
 def handle_string_literal(code: str, tokens: list, start_pos: int, line: int, column: int) -> Tuple[int, int, int]:
     lookahead = start_pos + 1
     while lookahead < len(code) and code[lookahead] != '"':
         lookahead += 1
-
     if lookahead >= len(code):
-        raise ValueError(f"Tokenizer - Unmatched quote at position {start_pos}")
-    tokens.append(Token('string', code[start_pos:lookahead+1], line, column))
+        raise ValueError(f"Tokenizer - Unmatched double-quote at position {start_pos}")
+    token_value = code[start_pos:lookahead + 1]
+    tokens.append(Token('string', token_value, line, column))
+    new_column = column + len(token_value)
+    return lookahead + 1, line, new_column
 
-    start_pos = lookahead + 1
-    column += (lookahead - start_pos) + 2  # +2 for the quotes
-    return start_pos, line, column
+
+def handle_symbol_literal(code: str, tokens: list, start_pos: int, line: int, column: int) -> Tuple[int, int, int]:
+    """Handle single-quoted symbol literals like 'a' or 'hello'."""
+    lookahead = start_pos + 1
+    while lookahead < len(code) and code[lookahead] != "'":
+        lookahead += 1
+    if lookahead >= len(code):
+        raise ValueError(f"Tokenizer - Unmatched single-quote at position {start_pos}")
+    token_value = code[start_pos:lookahead + 1]
+    tokens.append(Token('symbol', token_value, line, column))
+    new_column = column + len(token_value)
+    return lookahead + 1, line, new_column
+
 
 def handle_other_tokens(code: str, tokens: list, start_pos: int, line: int, column: int) -> Tuple[int, int, int]:
     lookahead = start_pos
-    while lookahead < len(code) and not code[lookahead].isspace() and code[lookahead] not in '():,':
+    while lookahead < len(code):
+        ch = code[lookahead]
+        if ch.isspace() or ch in _STOP_CHARS:
+            break
+        # Allow '.' inside a float (N.N), but stop at standalone '.'
+        if ch == '.':
+            prev_digit = lookahead > start_pos and code[lookahead - 1].isdigit()
+            next_digit = lookahead + 1 < len(code) and code[lookahead + 1].isdigit()
+            if prev_digit and next_digit:
+                lookahead += 1
+                continue
+            break
         lookahead += 1
 
     if start_pos == lookahead:
-        raise ValueError(f"Tokenizer - Invalid character at position {start_pos}: {code[start_pos]}")
+        raise ValueError(f"Tokenizer - Invalid character at position {start_pos}: {code[start_pos]!r}")
 
     token_value = code[start_pos:lookahead]
-    if token_value.startswith('-') and token_value[1:].isdigit():
-        tokens.append(Token('number', token_value, line, column))
-    elif token_value.isdigit():
-        tokens.append(Token('number', token_value, line, column))
-    else:
-        tokens.append(Token('identifier', token_value, line, column))
+    token_len = lookahead - start_pos
 
-    start_pos = lookahead
-    column += (lookahead - start_pos)
-    return start_pos, line, column
+    try:
+        int(token_value)
+        tokens.append(Token('number', token_value, line, column))
+    except ValueError:
+        try:
+            float(token_value)
+            tokens.append(Token('number', token_value, line, column))
+        except ValueError:
+            tokens.append(Token('identifier', token_value, line, column))
+
+    return lookahead, line, column + token_len
+
 
 def tokenize(code: str) -> list:
     tokens = []
@@ -77,32 +114,48 @@ def tokenize(code: str) -> list:
     column = 1
 
     while current_pos < len(code):
-        if code[current_pos].isspace():
-            current_pos += 1
-            if code[current_pos - 1] == '\n':
+        ch = code[current_pos]
+
+        if ch.isspace():
+            if ch == '\n':
                 line += 1
                 column = 1
             else:
                 column += 1
+            current_pos += 1
             continue
 
-        match code[current_pos]:
-            case '(':  # Open parenthesis
+        match ch:
+            case '(':
                 tokens.append(Token('lparen', '(', line, column))
                 paren_count += 1
                 current_pos += 1
-            case ')':  # Close parenthesis
+                column += 1
+            case ')':
                 tokens.append(Token('rparen', ')', line, column))
                 paren_count -= 1
                 current_pos += 1
-            case '{':  # Open braces
+                column += 1
+            case '{':
                 tokens.append(Token('lbrace', '{', line, column))
-                paren_count += 1
                 current_pos += 1
-            case '}':  # Close braces
+                column += 1
+            case '}':
                 tokens.append(Token('rbrace', '}', line, column))
-                paren_count -= 1
                 current_pos += 1
+                column += 1
+            case '[':
+                tokens.append(Token('lbracket', '[', line, column))
+                current_pos += 1
+                column += 1
+            case ']':
+                tokens.append(Token('rbracket', ']', line, column))
+                current_pos += 1
+                column += 1
+            case '.':
+                tokens.append(Token('dot', '.', line, column))
+                current_pos += 1
+                column += 1
             case ':':
                 tokens.append(Token('colon', ':', line, column))
                 current_pos += 1
@@ -111,9 +164,19 @@ def tokenize(code: str) -> list:
                 tokens.append(Token('comma', ',', line, column))
                 current_pos += 1
                 column += 1
-            case '"':  # String literal
+            case '<':
+                # <: is the eval operator; bare < is an identifier (comparison, future)
+                if current_pos + 1 < len(code) and code[current_pos + 1] == ':':
+                    tokens.append(Token('eval_op', '<:', line, column))
+                    current_pos += 2
+                    column += 2
+                else:
+                    current_pos, line, column = handle_other_tokens(code, tokens, current_pos, line, column)
+            case '"':
                 current_pos, line, column = handle_string_literal(code, tokens, current_pos, line, column)
-            case _:  # Identifier or number
+            case "'":
+                current_pos, line, column = handle_symbol_literal(code, tokens, current_pos, line, column)
+            case _:
                 current_pos, line, column = handle_other_tokens(code, tokens, current_pos, line, column)
 
     if paren_count != 0:

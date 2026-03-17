@@ -3,6 +3,11 @@ type: "meta"
 about: "
 Meta file for the META system
 META system is a methodology to describe a computer problem in a way that an AI can deterministically transform to code.
+The methodology is a form to use AI to generate systems in a iteractive, constructive and observable way.
+The way it works by creating two parallel descriptions that are managed by the AI and the user. The user writes  .meta, the AI responds with an .prompt, the user can them merge parts of .prompt back to .meta, once finished, the AI will generate a new .prompt - This loops goes until AI and user agree upon an implementation and the AI generates it.
+The implementation is a .air file and submodules.
+submodules can be embedded .air files or embedded folders, itself containing .air implementation.
+The novelty is in this iteractive file consensus development and the flexible/expandable and most important deterministic AiR representation.
 The methodology works by creating a meta file to describe the system, this file should be feed to an AI, that should be instructed to generate a meta.prompt.
 meta.prompt is a file in which the AI describes the sequential steps, rationale and implementation files to itself, in a way that, with that file it can in one pass, generate the final object, the implementation of the expanded description, with all the requiered tests passing.
 The files should be written in written in markdown, with code written in AiR.

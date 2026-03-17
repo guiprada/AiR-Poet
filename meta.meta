@@ -1,0 +1,37 @@
+name: "meta"
+type: "meta"
+about: "
+Meta file for the META system
+META system is a methodology to describe a computer problem in a way that an AI can deterministically transform to code.
+The methodology works by creating a meta file to describe the system, this file should be feed to an AI, that should be instructed to generate a meta.prompt.
+meta.prompt is a file in which the AI describes the sequential steps, rationale and implementation files to itself, in a way that, with that file it can in one pass, generate the final object, the implementation of the expanded description, with all the requiered tests passing.
+The files should be written in written in markdown, with code written in AiR.
+AiR is defined as the intermediary language, it is a target language for the AI. We then use an AiRVM to interpret it :)
+AiR can be tough of programatic tables, a file contains an inplicit top level table and the contents are key: value pairs.
+Every file/table has a name, a type and its type require keys.
+You can use this system to describe tests, systems, data, logic and computation.
+# tests
+name: "test_meta"
+type: "test"
+# we now add the tests, we can enumerate them
+0: (assert_eq 0 0)
+# or the indexing can be inplicit
+(assert_neq 0 1) # this is test # 1
+1: # this would error
+# systems
+name: "meta"
+type: "system"
+init: "init.air"
+pause: "pause.air"
+stop: "stop.air"
+components: {# this is a embedded table literal :), use with pride ;)
+    meta.air
+    test_meta.air
+    air.air
+    air_vm.air
+}
+tests: test_meta.air
+
+Can you generate a better meta.meta?
+Can you generate meta.prompt?
+"

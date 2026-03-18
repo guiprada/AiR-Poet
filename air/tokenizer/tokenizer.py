@@ -43,7 +43,7 @@ class Token:
 
 
 # Characters that always terminate a token when scanning forward
-_STOP_CHARS = set('(){}[].,:<')
+_STOP_CHARS = set('(){}[].,:</')
 
 
 def handle_string_literal(code: str, tokens: list, start_pos: int, line: int, column: int) -> Tuple[int, int, int]:
@@ -164,14 +164,30 @@ def tokenize(code: str) -> list:
                 tokens.append(Token('comma', ',', line, column))
                 current_pos += 1
                 column += 1
+            case '/':
+                # // starts a line comment — skip to end of line
+                if current_pos + 1 < len(code) and code[current_pos + 1] == '/':
+                    while current_pos < len(code) and code[current_pos] != '\n':
+                        current_pos += 1
+                else:
+                    # bare '/' treated as an identifier (e.g. division operator in future)
+                    tokens.append(Token('identifier', '/', line, column))
+                    current_pos += 1
+                    column += 1
             case '<':
-                # <: is the eval operator; bare < is an identifier (comparison, future)
+                # <: is the eval operator; <= is comparison; bare < is also comparison
                 if current_pos + 1 < len(code) and code[current_pos + 1] == ':':
                     tokens.append(Token('eval_op', '<:', line, column))
                     current_pos += 2
                     column += 2
+                elif current_pos + 1 < len(code) and code[current_pos + 1] == '=':
+                    tokens.append(Token('identifier', '<=', line, column))
+                    current_pos += 2
+                    column += 2
                 else:
-                    current_pos, line, column = handle_other_tokens(code, tokens, current_pos, line, column)
+                    tokens.append(Token('identifier', '<', line, column))
+                    current_pos += 1
+                    column += 1
             case '"':
                 current_pos, line, column = handle_string_literal(code, tokens, current_pos, line, column)
             case "'":

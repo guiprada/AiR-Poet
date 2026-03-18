@@ -68,6 +68,25 @@ def floor_divide(x, y):
 double_slash = floor_divide
 
 ## ----------------------------------------------------------------------------
+def less_than(x, y):
+    return x < y
+
+def less_than_or_equal(x, y):
+    return x <= y
+
+def greater_than(x, y):
+    return x > y
+
+def greater_than_or_equal(x, y):
+    return x >= y
+
+def equal(x, y):
+    return x == y
+
+def not_equal(x, y):
+    return x != y
+
+## ----------------------------------------------------------------------------
 OPERATOR_DICT = {
     '+': plus,
     '-': minus,
@@ -76,6 +95,12 @@ OPERATOR_DICT = {
     '%': modulus,
     '^': caret,
     '//': double_slash,
+    '<': less_than,
+    '<=': less_than_or_equal,
+    '>': greater_than,
+    '>=': greater_than_or_equal,
+    '==': equal,
+    '!=': not_equal,
 }
 
 OPERATOR_LIST = list(OPERATOR_DICT.keys())

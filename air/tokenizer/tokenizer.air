@@ -12,11 +12,3 @@ Token: {
     about: "A single lexical token with type, value, and source position"
     fields: { token_type: symbol, value: string, line: number, column: number }
 }
-
-python_source: {
-    name: "tokenizer.py"
-    type: "python_source"
-    runtime_type: "cpython"
-    runtime_min_version: "3.10"
-    runtime_max_version: "3.12"
-}

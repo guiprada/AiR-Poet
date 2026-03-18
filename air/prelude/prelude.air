@@ -9,11 +9,3 @@ divide:   { about: "divide x by y",        input: { x: number, y: number }, outp
 modulus:  { about: "x mod y",              input: { x: number, y: number }, output: number }
 exponent: { about: "x to the power of y",  input: { x: number, y: number }, output: number }
 floor_divide: { about: "floor division",   input: { x: number, y: number }, output: number }
-
-python_source: {
-    name: "prelude.py"
-    type: "python_source"
-    runtime_type: "cpython"
-    runtime_min_version: "3.10"
-    runtime_max_version: "3.12"
-}

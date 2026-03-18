@@ -8,11 +8,3 @@ main: {
     output: {}
     side_effects: { "reads stdin", "writes stdout" }
 }
-
-python_source: {
-    name: "repl.py"
-    type: "python_source"
-    runtime_type: "cpython"
-    runtime_min_version: "3.10"
-    runtime_max_version: "3.12"
-}

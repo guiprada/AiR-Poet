@@ -1,0 +1,46 @@
+name: "AiR-Poet"
+type: "system"
+about: "
+AiR-Poet is the runtime implementation of the AiR intermediary representation language.
+
+AiR is a table-based Lisp with lazy evaluation, mixed indexing, and scope inheritance,
+designed as a target language for deterministic AI code generation via the META methodology.
+
+## Architecture
+
+AiR-Poet is a pipeline:
+
+  source text
+    → tokenizer   (lexical analysis, flat token stream)
+    → parser      (token stream → AST)
+    → ast_node    (AST data model / node types)
+    → interpreter (tree-walk evaluator)
+    → prelude     (built-in functions, operators, standard environment)
+    → repl        (interactive session)
+
+## File Conventions
+
+Each component follows the same layout:
+  <name>.meta   — specification (this format)
+  <name>.air    — AiR language definition of the component
+  <name>.py     — Python implementation
+  plan_<name>.md — design rationale and decisions
+  test.py / test.air — tests
+
+## Related Systems
+
+  air_meta/   — META methodology implementation (consensus-driven AI code generation)
+  air_vm/     — AiR virtual machine (bytecode or direct AST execution)
+"
+
+components: {
+    air
+    tokenizer
+    parser
+    ast_node
+    interpreter
+    prelude
+    repl
+    air_meta
+    air_vm
+}

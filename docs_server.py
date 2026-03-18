@@ -16,7 +16,7 @@ import re
 import sys
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, unquote_plus
 
 ROOT = Path(__file__).parent
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
@@ -84,7 +84,7 @@ def scan_components() -> list:
 
 def scan_docs() -> list:
     docs = []
-    for name in ('ARCHITECTURE.md', 'TODO.md', 'CODEBASE_ANALYSIS.md', 'bootstrap_meta.meta'):
+    for name in ('air_poet.meta', 'ARCHITECTURE.md', 'TODO.md', 'CODEBASE_ANALYSIS.md', 'bootstrap_meta.meta'):
         f = ROOT / name
         if f.exists():
             docs.append(f)
@@ -170,6 +170,20 @@ h3 { font-size: 1rem; margin: 1.4rem 0 .5rem; color: #444; }
 pre { background: var(--code-bg); color: var(--code-fg); padding: 1rem 1.1rem;
       border-radius: 6px; overflow-x: auto; overflow-y: auto; max-height: 480px;
       font-size: .78rem; line-height: 1.5; tab-size: 4; }
+
+/* editor */
+.editor-wrap { position: relative; margin-bottom: 1rem; }
+textarea.editor { width: 100%; background: var(--code-bg); color: var(--code-fg);
+  padding: 1rem 1.1rem; border-radius: 6px; border: none; outline: none;
+  font-family: 'JetBrains Mono','Fira Code','Consolas',monospace; font-size: .78rem;
+  line-height: 1.5; tab-size: 4; resize: vertical; min-height: 260px; }
+textarea.editor:focus { box-shadow: 0 0 0 2px var(--accent); }
+.save-bar { display: flex; align-items: center; gap: .8rem; margin-bottom: 1.4rem; }
+.btn { padding: .35rem .9rem; border-radius: 4px; font-size: .82rem; cursor: pointer;
+       border: 1px solid var(--accent); background: var(--accent); color: #fff; font-weight: 500; }
+.btn:hover { opacity: .85; }
+.btn-ghost { background: transparent; color: var(--accent); }
+#status { font-size: .82rem; transition: opacity .4s; opacity: 0; }
 
 /* doc list */
 .doc-list { list-style: none; }
@@ -279,9 +293,21 @@ def index_page() -> str:
         f'<li><a href="/file?p={rel(f)}">{h(rel(f))}</a></li>'
         for f in docs
     )
+    top_meta = ROOT / 'air_poet.meta'
+    top_about = ''
+    if top_meta.exists():
+        tm = parse_meta(top_meta.read_text('utf-8', errors='replace'))
+        if tm.get('about'):
+            top_about = (f'<div class="about-block" style="margin-bottom:1.8rem">'
+                         f'<div style="display:flex;justify-content:space-between;align-items:center;'
+                         f'margin-bottom:.5rem"><strong>air_poet.meta</strong>'
+                         f'<a href="/file?p=air_poet.meta" style="font-size:.8rem">edit</a></div>'
+                         f'{h(tm["about"])}</div>')
+
     return page('Home', f"""
 <h2>AiR-Poet</h2>
 <p class="sub">Intermediary Representation Language — table-based Lisp for deterministic AI code generation</p>
+{top_about}
 <div class="grid">{cards}</div>
 <h3>Documentation &amp; Notes</h3>
 <ul class="doc-list">{doc_items}</ul>
@@ -316,10 +342,12 @@ def component_page(cid: str) -> str:
             content = fpath.read_text('utf-8', errors='replace')
         except Exception as e:
             content = f'(error: {e})'
-        raw_link = f'<a href="/file?p={rel(fpath)}">{h(fname)}</a>'
+        frel = rel(fpath)
+        raw_link = f'<a href="/file?p={frel}">{h(fname)}</a>'
+        edit_link = f'<a href="/file?p={frel}" style="font-size:.72rem;color:var(--muted)">edit</a>'
         files_html += (
             f'<div class="file-group">'
-            f'<div class="file-header">{raw_link}</div>'
+            f'<div class="file-header">{raw_link} {edit_link}</div>'
             f'<pre>{h(content)}</pre>'
             f'</div>'
         )
@@ -364,11 +392,47 @@ def file_page(path_str: str) -> str:
         if meta.get('about'):
             extra = f'<div class="about-block">{h(meta["about"])}</div>'
 
+    path_json = json.dumps(path_str)
+    editor_js = f"""
+<script>
+const _PATH = {path_json};
+function _status(msg, ok) {{
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.style.color = ok ? '#a6e3a1' : '#f38ba8';
+  el.style.opacity = '1';
+  setTimeout(() => el.style.opacity = '0', 2500);
+}}
+async function _save() {{
+  const content = document.getElementById('editor').value;
+  try {{
+    const r = await fetch('/save?p=' + encodeURIComponent(_PATH), {{
+      method: 'POST',
+      headers: {{'Content-Type': 'application/x-www-form-urlencoded'}},
+      body: 'content=' + encodeURIComponent(content)
+    }});
+    const j = await r.json();
+    _status(j.ok ? 'Saved' : 'Error: ' + j.error, j.ok);
+  }} catch(e) {{ _status('Network error', false); }}
+}}
+document.addEventListener('keydown', e => {{
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {{ e.preventDefault(); _save(); }}
+}});
+</script>"""
+
     return page(p.name, f"""
 <div class="bc">{bc}</div>
 <h2>{h(p.name)}</h2>
 {extra}
-<pre>{h(content)}</pre>
+<div class="save-bar">
+  <button class="btn" onclick="_save()">Save</button>
+  <span id="status"></span>
+  <span style="margin-left:auto;font-size:.76rem;color:var(--muted)">Ctrl+S to save</span>
+</div>
+<div class="editor-wrap">
+  <textarea id="editor" class="editor" spellcheck="false">{h(content)}</textarea>
+</div>
+{editor_js}
 """)
 
 
@@ -526,6 +590,33 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(gen_context_md(), 'text/markdown; charset=utf-8')
             case _:
                 self._send(page('Not found', '<p>Not found. <a href="/">Home</a></p>'), status=404)
+
+    def do_POST(self):
+        parsed = urlparse(self.path)
+        qs = parse_qs(parsed.query)
+        length = int(self.headers.get('Content-Length', 0))
+        raw = self.rfile.read(length).decode('utf-8')
+        params = parse_qs(raw)
+
+        if parsed.path == '/save':
+            path_str = qs.get('p', [''])[0]
+            content = unquote_plus(params.get('content', [''])[0])
+            p = _safe_path(path_str)
+            if not p:
+                self._send(json.dumps({'ok': False, 'error': 'invalid path'}),
+                           'application/json', 403)
+                return
+            try:
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_text(content, encoding='utf-8')
+                print(f'  saved  {path_str}')
+                self._send(json.dumps({'ok': True}), 'application/json')
+            except Exception as e:
+                self._send(json.dumps({'ok': False, 'error': str(e)}),
+                           'application/json', 500)
+        else:
+            self._send(json.dumps({'ok': False, 'error': 'not found'}),
+                       'application/json', 404)
 
     def log_message(self, fmt, *args):
         print(f'  {args[1]}  {args[0]}')

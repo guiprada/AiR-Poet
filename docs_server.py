@@ -241,6 +241,24 @@ def _sidebar(active='') -> str:
 
 
 def page(title: str, body: str, active='') -> str:
+    shared_js = """<script>
+async function _saveFile(path, taId, statusId) {
+  const content = document.getElementById(taId).value;
+  const s = document.getElementById(statusId);
+  try {
+    const r = await fetch('/save?p=' + encodeURIComponent(path), {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: 'content=' + encodeURIComponent(content)
+    });
+    const j = await r.json();
+    s.textContent = j.ok ? 'Saved' : 'Error: ' + j.error;
+    s.style.color = j.ok ? '#a6e3a1' : '#f38ba8';
+  } catch(e) { s.textContent = 'Network error'; s.style.color = '#f38ba8'; }
+  s.style.opacity = '1';
+  setTimeout(() => s.style.opacity = '0', 2500);
+}
+</script>"""
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -254,6 +272,7 @@ def page(title: str, body: str, active='') -> str:
 <main id="main">
 {body}
 </main>
+{shared_js}
 </body>
 </html>"""
 
@@ -336,19 +355,26 @@ def component_page(cid: str) -> str:
     about_html = (f'<div class="about-block">{h(about)}</div>' if about else '')
 
     files_html = ''
-    for fname in sorted(c['files'], key=_file_role_key):
+    for i, fname in enumerate(sorted(c['files'], key=_file_role_key)):
         fpath = c['files'][fname]
         try:
             content = fpath.read_text('utf-8', errors='replace')
         except Exception as e:
             content = f'(error: {e})'
         frel = rel(fpath)
+        ta_id = f'ed-{cid}-{i}'
+        st_id = f'st-{cid}-{i}'
+        nlines = max(6, content.count('\n') + 2)
         raw_link = f'<a href="/file?p={frel}">{h(fname)}</a>'
-        edit_link = f'<a href="/file?p={frel}" style="font-size:.72rem;color:var(--muted)">edit</a>'
         files_html += (
             f'<div class="file-group">'
-            f'<div class="file-header">{raw_link} {edit_link}</div>'
-            f'<pre>{h(content)}</pre>'
+            f'<div class="file-header">{raw_link}'
+            f'  <button class="btn" style="padding:.1rem .5rem;font-size:.7rem"'
+            f'   onclick="_saveFile({json.dumps(frel)},{json.dumps(ta_id)},{json.dumps(st_id)})">'
+            f'Save</button>'
+            f'  <span id="{st_id}" style="font-size:.75rem;transition:opacity .4s;opacity:0"></span>'
+            f'</div>'
+            f'<textarea id="{ta_id}" class="editor" spellcheck="false" rows="{nlines}">{h(content)}</textarea>'
             f'</div>'
         )
 
@@ -393,46 +419,24 @@ def file_page(path_str: str) -> str:
             extra = f'<div class="about-block">{h(meta["about"])}</div>'
 
     path_json = json.dumps(path_str)
-    editor_js = f"""
-<script>
-const _PATH = {path_json};
-function _status(msg, ok) {{
-  const el = document.getElementById('status');
-  el.textContent = msg;
-  el.style.color = ok ? '#a6e3a1' : '#f38ba8';
-  el.style.opacity = '1';
-  setTimeout(() => el.style.opacity = '0', 2500);
-}}
-async function _save() {{
-  const content = document.getElementById('editor').value;
-  try {{
-    const r = await fetch('/save?p=' + encodeURIComponent(_PATH), {{
-      method: 'POST',
-      headers: {{'Content-Type': 'application/x-www-form-urlencoded'}},
-      body: 'content=' + encodeURIComponent(content)
-    }});
-    const j = await r.json();
-    _status(j.ok ? 'Saved' : 'Error: ' + j.error, j.ok);
-  }} catch(e) {{ _status('Network error', false); }}
-}}
-document.addEventListener('keydown', e => {{
-  if ((e.ctrlKey || e.metaKey) && e.key === 's') {{ e.preventDefault(); _save(); }}
-}});
-</script>"""
+    nlines = max(10, content.count('\n') + 2)
+    ctrlS_js = (f'<script>document.addEventListener("keydown",e=>{{'
+                f'if((e.ctrlKey||e.metaKey)&&e.key==="s"){{'
+                f'e.preventDefault();_saveFile({path_json},"editor","status");}}}});</script>')
 
     return page(p.name, f"""
 <div class="bc">{bc}</div>
 <h2>{h(p.name)}</h2>
 {extra}
 <div class="save-bar">
-  <button class="btn" onclick="_save()">Save</button>
+  <button class="btn" onclick="_saveFile({path_json},'editor','status')">Save</button>
   <span id="status"></span>
   <span style="margin-left:auto;font-size:.76rem;color:var(--muted)">Ctrl+S to save</span>
 </div>
 <div class="editor-wrap">
-  <textarea id="editor" class="editor" spellcheck="false">{h(content)}</textarea>
+  <textarea id="editor" class="editor" spellcheck="false" rows="{nlines}">{h(content)}</textarea>
 </div>
-{editor_js}
+{ctrlS_js}
 """)
 
 
@@ -600,7 +604,7 @@ class Handler(BaseHTTPRequestHandler):
 
         if parsed.path == '/save':
             path_str = qs.get('p', [''])[0]
-            content = unquote_plus(params.get('content', [''])[0])
+            content = params.get('content', [''])[0]
             p = _safe_path(path_str)
             if not p:
                 self._send(json.dumps({'ok': False, 'error': 'invalid path'}),

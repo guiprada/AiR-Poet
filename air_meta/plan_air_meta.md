@@ -1,296 +1,282 @@
-# plan_air_meta - META System Implementation Plan
+# Plan: air_meta
 
-## Overview
-This plan describes the sequential steps, rationale, and implementation files needed to construct the META system - a methodology for AI-driven, deterministic code generation through iterative file-based consensus.
-
-## Rationale
-
-The META system solves the problem of translating high-level problem descriptions into concrete implementations deterministically. By using parallel descriptions (`.meta` and `plan_*.md` files), the system enables:
-
-1. **User-driven specification** via `.meta` files (what to build)
-2. **AI-driven planning** via `plan_*.md` files (how to build it)
-3. **Consensus-driven iteration** where both parties converge on implementation
-4. **Deterministic output** in AiR (intermediary representation language)
-5. **Executable system** via AiRVM interpretation and module/system composition
-
-## Architectural Foundation: Modules vs Systems
-
-Before implementation, understand the core distinction:
-
-**Modules** = Pure, Immutable Code
-- Pure functions and immutable constant libraries
-- Single import per running system via `require:` key
-- Shared fearlessly across all systems
-- Implemented as `.air` files or folders with same-name `.air` file
-- No mutable state; composition-only semantics
-
-**Systems** = Stateful Execution Environments
-- Applications with mutable state = modules + data
-- Instantiable multiple times via `initialize:` key
-- Full lifecycle management: `init` → `start` → `update` → `pause` → `stop`
-- Implemented as `.air` files with state definitions and behavior
-
-## Sequential Implementation Steps
-
-### Phase 1: Core AiR Language Definition
-**Files:** `air.air`, `air_vm.air`
-
-1. Define AiR syntax and semantics in AiR notation - New AiR folder in AiR-Poet
-   - Primitives: numbers (int/float), strings, booleans, symbols
-   - Collections: tables (key-value maps with implicit/explicit indexing)
-   - Expressions: Lisp-like forms for computation and control flow
-   - Take a look at old Air specification and implementation - move it to AiR/lost_and_found/
-   
-2. Implement AiRVM (Virtual Machine/interpretation engine)
-   - Start with Python AST tree walker for parsing and executing AiR files
-   - Phase 2: Compile to lightning VM bytecode for performance
-   - Phase 3: Embedded C lightning VM in python for production deployments
-
-3. Support basic constructs: 
-   - Numbers, strings, booleans, symbols, Lisp expressions, conditional logic(control flow), and function definitions
-   - Tables, key-value pairs, assertions
-   - Embedded table literals with mixed key/value syntax
-
-4. Establish mandatory fields for all tables:
-   - `name`: identifier for the table
-   - `type`: determines required keys (test, system, module, data, computation, logic)
-   - Type-specific keys: systems need `init`, `pause`, `stop`, `start`, `update`; modules need function definitions
-
-**Key Features:**
-- Top-level implicit table model (entire file is a table)
-- Modules imported via `require:` key (imports pure code)
-- Systems instantiated via `initialize:` key (creates executable instances)
-- Embedded table literals with key-value syntax
-- Type system enforces required keys based on type
-- Index notation: both explicit (0:, 1:) and implicit (sequential enumeration)
-
-### Phase 2: Test Infrastructure
-**Files:** `test_meta.air`
-
-1. Define test specification format for AiR
-   - Numbered assertions: `0: (assert_eq expected actual)`
-   - Implicit enumeration: `(assert_neq a b)` auto-numbered
-
-2. Implement assertion operations: `assert_eq`, `assert_neq`, and optionally `assert_less`, `assert_lesseq`, etc.
-
-3. Support both explicit indexing and implicit enumeration in test tables
-
-4. Enable test discovery and execution via AiRVM
-   - Parse test tables
-   - Execute assertions in order
-   - Report pass/fail status
-
-**Test Coverage:**
-- Verify AiR parsing and interpretation
-- Validate table construction and nesting
-- Test assertion framework
-- Validate module imports with `require:`
-- Validate system instantiation with `initialize:`
-
-### Phase 3: Module and System Loaders
-**Files:** `module_loader.air`, `system_loader.air`
-
-1. **Module Loader** (`require:` semantics)
-   - Parse and import `.air` modules
-   - Validate modules have correct `type: "module"` and function definitions
-   - Make module contents available in scope
-   - Prevent mutable state imports
-
-2. **System Loader** (`initialize:` semantics)
-   - Parse and instantiate `.air` systems
-   - Create isolated execution environments with initial state
-   - Initialize system data from definitions
-   - Set up lifecycle handlers (init, start, update, pause, stop)
-   - Allow multiple independent instantiations
-
-3. Handle folder-based modules/systems
-   - Folder with name `foo` contains `foo.air`
-   - Auto-discover and load on import
-
-### Phase 4: Lifecycle Management
-**Files:** `meta.air`, `init.air`, `pause.air`, `stop.air`, `lifecycle.air`
-
-1. **meta.air** - System orchestration and lifecycle
-   - Define how systems are initialized and stopped
-   - Manage order of execution for multiple systems
-
-2. **init.air** - Initialization sequence
-   - Load `.meta` specifications
-   - Initialize AiRVM runtime
-   - Load all required modules via `require:`
-   - Instantiate all required systems via `initialize:`
-
-3. **Start phase** - Beginning of system execution
-   - Run system `start:` handlers in order
-   - Initialize data structures and state
-
-4. **Update phase** - System updates/ticks
-   - Run periodic system `update:` handlers
-   - Handle state mutations
-
-5. **pause.air** - Checkpoint/pause state
-   - Serialize system state
-   - Save intermediate consensus state
-   - Pause execution without shutdown
-
-6. **stop.air** - Graceful shutdown
-   - Run system `stop:` handlers in reverse order
-   - Cleanup resources
-   - Archive final state and consensus
-
-### Phase 5: Intrinsic Functions
-**File:** `intrinsics.air`
-
-Implement core built-in functions:
-- Arithmetic: `add`, `sub`, `mult`, `div`, `mod`, `sqrt`, `exp`, `log`
-- Comparison: `eq`, `neq`, `lt`, `gt`, `lte`, `gte`
-- Logic: `and`, `or`, `not`
-- Control flow: `if`, `then`, `else`
-- Type: `typeof`, `is_number`, `is_string`, `is_table`
-- Table ops: `get`, `set`, `keys`, `values`, `merge`
-- Assertions: `assert_eq`, `assert_neq`, `assert_less`, etc.
-- Module/System: `require`, `initialize`, `define`
-
-### Phase 6: Output Generation and Testing
-**File:** (generated outputs)
-
-1. Accept `.meta` + `plan_*.md` consensus as input
-2. Generate executable `.air` implementation files
-3. Compile/generate module and system loader files
-4. Validate generated code against `test_meta.air`
-5. Package final deliverable with all submodules
-6. Verify determinism: same input → same output
-
-## Implementation Architecture
-
-```
-META System
-├── AiR Language Layer
-│   ├── air.air              (language definition)
-│   └── air_vm.air           (AiRVM specification)
-├── Runtime Layer
-│   ├── module_loader.air    (require: implementation)
-│   ├── system_loader.air    (initialize: implementation)
-│   └── intrinsics.air       (built-in functions)
-├── Test Layer
-│   └── test_meta.air        (validation tests)
-├── Lifecycle Layer
-│   ├── meta.air             (meta system definition)
-│   ├── init.air             (initialization)
-│   ├── lifecycle.air        (lifecycle management)
-│   └── stop.air             (shutdown)
-└── Generated Outputs
-    ├── [system_name].air    (user-defined systems)
-    └── [module_name].air    (user-defined modules)
-```
-
-## Key Definitions (AiR Notation)
-
-### Module Format (Pure Functions/Constants)
-```
-name: "math_lib"
-type: "module"
-add: (define (a b) { add a b })
-mul: (define (a b) { mul a b })
-PI: 3.14159
-```
-
-### System Format (Stateful Application)
-```
-name: "counter_system"
-type: "system"
-init: "init.air"
-pause: "pause.air"
-stop: "stop.air"
-start: (define () { ... })
-update: (define () { ... })
-require: {
-    math: "math_lib.air"
-}
-initialize: {
-    "subsystem1.air"
-    "subsystem2.air"
-}
-data: {
-    counter: 0
-    max: 100
-}
-tests: "test_counter.air"
-```
-
-### Test Format
-```
-name: "test_suite_name"
-type: "test"
-0: (assert_eq 0 0)
-1: (assert_neq 0 1)
-2: (assert_eq (add 1 2) 3)
-```
-
-### Data Format
-```
-name: "data_table"
-type: "data"
-numbers: { 42 3.14 -7 }
-strings: { "hello" "world" }
-nested: {
-    inner: { a 1 b 2 }
-}
-```
-
-## Iteration Loop
-
-1. User provides/refines `.meta` file with module/system definitions
-2. AI generates `plan_<name>.md` (this plan)
-3. User reviews `plan_<name>.md`, suggests refinements back to `.meta`
-4. Loop repeats until consensus is reached
-5. AI implements final consensus in `.air` files
-6. Run `test_meta.air` validates complete implementation
-7. Generate and package final deliverable
-
-## Success Criteria
-
-✓ AiRVM successfully parses all AiR syntax
-✓ All tests in `test_meta.air` pass
-✓ Module imports via `require:` work correctly
-✓ System instantiation via `initialize:` works correctly
-✓ Lifecycle phases execute in correct order
-✓ Generated implementation matches consensus description
-✓ Deterministic: same `.meta` + `plan_*.md` → identical implementation
-✓ Multiple system instantiations remain independent
-
-## Implementation Roadmap
-
-### Week 1-2: Phase 1 (AiR Language + AiRVM)
-- Parse basic AiR syntax (tables, primitives, Lisp expressions)
-- Implement Python tree walker interpreter
-- Support basic operations and assertions
-
-### Week 3: Phase 2 (Test Infrastructure)
-- Build assertion framework
-- Create test runner
-- Validate core language features
-
-### Week 4: Phase 3 (Module/System Loaders)
-- Implement `require:` semantics
-- Implement `initialize:` semantics
-- Support nested modules/systems
-
-### Week 5: Phase 4 (Lifecycle Management)
-- Implement lifecycle hooks
-- State management between phases
-- System orchestration
-
-### Week 6: Phase 5-6 (Intrinsics + Output Gen)
-- Complete built-in function library
-- Implement output generation
-- Full end-to-end testing
+Generated from: `air_meta/air_meta.meta`
+Status: Phase 1 Python runtime partially complete; AiR self-description incomplete
 
 ---
 
-**Generated by:** META System Generator  
-**User:** [Guilio Prada]
-**Target Language:** AiR (Intermediary Representation)  
-**Execution Engine:** AiRVM (Python AST walker → Lightning VM → Embedded C)  
-**Status:** Ready for Phase 1 implementation  
-**Last Updated:** 2026-03-17
+## 1. Current State Inventory
+
+### File Structure
+
+```
+AiR/
+  air.air        ← AiR language self-description (most complete AiR file; needs merge into air/)
+  air.meta       ← Language spec (content belongs in air_meta.meta)
+  README.md
+air/
+  tokenizer/
+    tokenizer.py      ← Phase 1 Python implementation (working, tested)
+    tokenizer.air     ← AiR stub: API surface only, type: module
+    test.py           ← Python tests (passing)
+    test.air          ← Python descriptor, type: python_source
+    tokenizer.meta
+  parser/             ← same pattern as tokenizer
+  ast_node/           ← same pattern; also has test_hashes.py / test_hashes.air
+  interpreter/        ← same pattern; also has utils.py / utils.air
+  prelude/            ← no test.py yet
+  repl/               ← no test.py yet
+air_meta/
+  air_meta.meta       ← Single source of truth
+  plan_air_meta.md    ← This file
+air_vm/
+  air_vm.meta         ← EMPTY — major gap
+bootstrap_meta.meta   ← Original bootstrap; superseded
+```
+
+### Phase 1 Python Runtime — What Works
+
+- `tokenize(source) → [Token]` — complete and tested
+- `parse_program(tokens) → TableNode` — complete and tested
+- `interpret(ast, env) → value` — working:
+  - Literals: NumberNode, StringNode, SymbolNode
+  - Identifiers: looked up in env, then in LOOKUP (prelude)
+  - TableNode: returned as-is (lazy — tables are data until `eval`'d)
+  - `EvalNode` (`<: expr`) — forces evaluation of a table
+  - `if:` / `then:` / `else:` — special form in table
+  - `init:` / `cond:` / `loop:` — loop special form in table
+  - `define` — binds name in env
+  - `eval` — explicit evaluation of table
+  - `CallExpressionNode` — Lisp `(f a b)` style
+  - `TableCallNode` — table-style `f{ a b }` style
+  - `FieldAccessNode` — `table.field`
+  - `IndexAccessNode` — `table[key]`
+- `prelude` — arithmetic, comparison, logic (Python functions, exposed via LOOKUP)
+- `repl` — interactive session
+
+### What is Missing / Gaps
+
+1. **`AiR/` not merged** — `air.air` (the language definition) has no home in `air/`
+2. **`air_vm.meta` is empty** — the AiRVM specification is not written
+3. **All unit `*.air` stubs are placeholders** — they describe API shape only, not implementations
+4. **`require:` not implemented** — interpreter cannot load `.air` modules at runtime
+5. **`initialize:` not implemented** — interpreter cannot instantiate systems
+6. **`name:` / `type:` enforcement absent** — loaded files are not validated for mandatory fields
+7. **Naming inconsistency** — `air.air` defines `add`/`sub`/`mult`/`div`; `prelude.air` uses `add`/`subtract`/`multiply`/`divide`
+8. **`python_source` descriptor format** — `test.air` etc. wrap content in `{}` but all other `.air` files are bare top-level tables (inconsistent)
+9. **`type: "module"` stubs** — the unit `.air` files claim `type: "module"` but contain no working function bodies
+
+---
+
+## 2. The Type Dispatch Model
+
+Every `.air` file has a `type:` key. `type` determines BOTH dispatch (which handler runs this file)
+AND semantics (how content is interpreted).
+
+**Rule**: All types except `python_source` (and future `c_source`, `js_source`) are AiR source
+handled by AiRVM. There is NO separate `air_source` type — AiRVM is the default handler.
+`python_source` is the only exception: it delegates to Python, and the file is merely a descriptor.
+
+| `type:` value   | Dispatch handler  | Semantic role                          |
+|-----------------|-------------------|----------------------------------------|
+| `module`        | AiRVM             | Pure functions and immutable constants |
+| `system`        | AiRVM             | Stateful execution with lifecycle      |
+| `test`          | AiRVM             | Ordered assertions                     |
+| `data`          | AiRVM             | Pure structured data, no behavior      |
+| `computation`   | AiRVM             | Evaluable arithmetic/logic forms       |
+| `logic`         | AiRVM             | Control flow expressions               |
+| `python_source` | Python handler    | Descriptor for a `.py` file            |
+| `meta`          | META system       | Specification / planning document      |
+
+**Consequence for unit `.air` files**: `tokenizer.air` with `type: "module"` IS an AiR source
+file handled by AiRVM. The stubs currently have no function bodies — they need real implementations.
+
+---
+
+## 3. AiR/ → air/ Merge
+
+`AiR/air.air` is the most developed AiR self-description and belongs in the `air/` module hierarchy.
+
+**Target**: `air/air/air.air`
+
+The folder-module convention is: a module named `foo` lives at `air/foo/foo.air`.
+The `air` module (the language definition itself) follows the same convention: `air/air/air.air`.
+It would be imported as: `require: { air: "air/air/air.air" }`.
+
+**Steps**:
+1. Create `air/air/` directory
+2. Move `AiR/air.air` → `air/air/air.air`
+3. Merge `AiR/air.meta` content into `air_meta/air_meta.meta`
+4. Remove `AiR/` directory
+
+---
+
+## 4. Naming Consistency Fix
+
+`air/air/air.air` defines the canonical AiR intrinsic names:
+`add`, `sub`, `mult`, `div`, `mod`, `sqrt`, `exp`, `log`
+
+`prelude.air` and `prelude.py` currently use different names:
+`add`, `subtract`, `multiply`, `divide`, `modulus`, `exponent`, `floor_divide`
+
+**Fix**: `prelude` should align with `air.air` names. Ideally `prelude.air` imports `air.air` via
+`require:` and re-exports or wraps the canonical names. `prelude.py` must be updated to match.
+
+---
+
+## 5. `python_source` Descriptor Format Fix
+
+Current (inconsistent — has wrapper `{}`):
+```
+{
+    name: "test.py"
+    type: "python_source"
+    runtime_type: "cpython"
+    runtime_min_version: "3.10"
+    runtime_max_version: "3.12"
+}
+```
+
+Correct (bare top-level table, consistent with all other `.air` files):
+```
+name: "test.py"
+type: "python_source"
+runtime_type: "cpython"
+runtime_min_version: "3.10"
+runtime_max_version: "3.12"
+```
+
+All `test.air`, `utils.air`, `test_hashes.air`, `test_print.air` need this fix.
+
+---
+
+## 6. `air_vm` Gap
+
+`air_vm/air_vm.meta` is empty. The Phase 1 AiRVM is `interpreter.py` — a Python AST tree-walker.
+It needs a proper AiR self-description.
+
+`air_vm` is a **system** (not a module) because:
+- Phase 2+ will have mutable state (bytecode compiler state, VM registers)
+- It has a lifecycle: initialize (load module), start (begin evaluating), stop (cleanup)
+- Multiple VM instances might run concurrently
+
+**Files to create**:
+- `air_vm/air_vm.meta` — spec: what the VM does, phases, dispatch by type
+- `air_vm/air_vm.air` — AiR self-description, `type: system`
+
+---
+
+## 7. Implementation Phases
+
+### Phase 1 — Python Foundation
+
+Status: mostly done
+
+- [x] Tokenizer (tokenize.py)
+- [x] Parser (parser.py)
+- [x] AST nodes (ast_node.py)
+- [x] Interpreter: literals, identifiers, tables (lazy), if/loop forms, define, eval, call, field/index access
+- [x] Prelude: arithmetic, comparison, logic (prelude.py)
+- [x] REPL (repl.py)
+- [ ] `require:` file loading — read `.air` file, eval as module env, inject into caller env
+- [ ] `initialize:` system instantiation — create system instance with lifecycle + data
+- [ ] `name:` / `type:` mandatory field validation on loaded files
+
+### Phase 2 — AiR Self-Description
+
+Status: gap
+
+- [ ] Merge `AiR/air.air` → `air/air/air.air`
+- [ ] Write `air_vm/air_vm.meta` and `air_vm/air_vm.air`
+- [ ] Fix `python_source` descriptor format (remove wrapper braces)
+- [ ] Fix naming consistency (align prelude names with air.air names)
+- [ ] Fill `prelude.air` with real AiR function bodies (not just API stubs)
+- [ ] Fill `ast_node.air` with real AiR type definitions
+
+### Phase 3 — Module/System Loader
+
+Status: not started
+
+- [ ] `require:` loader: given a file path, parse → eval as module → return env table
+- [ ] `initialize:` loader: given a system path, parse → instantiate (copy + inject data + bind lifecycle)
+- [ ] Folder-based discovery: `air/tokenizer/tokenizer.air` resolves as module `tokenizer`
+- [ ] `_meta_table` scope inheritance: module env set as `_meta_table` in importing env
+
+### Phase 4 — AiR Self-Hosted Tests
+
+Status: not started
+
+- [ ] `test_meta.air` (defined inline in `air_meta.meta`) passes when run via AiRVM
+- [ ] Unit `test.air` files evolve from `python_source` descriptors to real AiR test tables
+- [ ] Python `test.py` files remain for regression testing throughout bootstrap
+
+### Phase 5 — AiRVM Phases 2 and 3
+
+Status: Phase 1 done (Python tree-walker = interpreter.py); 2 and 3 not started
+
+- [ ] Document Phase 1 AiRVM in `air_vm/air_vm.air`
+- [ ] Phase 2: Lightning bytecode compiler design
+- [ ] Phase 3: Embedded C lightning VM design
+
+---
+
+## 8. Self-Hosting Priority Order
+
+The path from Python stubs to real AiR implementations, simplest first:
+
+1. `prelude.air` — pure arithmetic and logic; no recursion, no file I/O
+2. `ast_node.air` — data type definitions; no behavior logic
+3. `tokenizer.air` — character-level string processing
+4. `parser.air` — recursive descent over token list
+5. `interpreter.air` — self-hosting the evaluator (most complex; requires all above)
+6. `repl.air` — entry point, wires everything together
+
+---
+
+## 9. Output Files (Final Consensus)
+
+```
+air/
+  air/
+    air.air              ← Language definition (from AiR/air.air, expanded)
+  tokenizer/
+    tokenizer.air        ← Full AiR implementation (type: module)
+  parser/
+    parser.air           ← Full AiR implementation (type: module)
+  ast_node/
+    ast_node.air         ← Type definitions (type: module)
+  interpreter/
+    interpreter.air      ← Evaluator in AiR (type: module)
+  prelude/
+    prelude.air          ← Arithmetic/logic in AiR, aligned with air.air names (type: module)
+  repl/
+    repl.air             ← Entry point (type: system — has lifecycle)
+air_vm/
+  air_vm.air             ← VM spec (type: system)
+air_meta/
+  test_meta.air          ← Validation suite (type: test)
+```
+
+---
+
+## 10. Open Questions for `air_meta.meta`
+
+Design decisions that need to be explicit before code generation can proceed:
+
+1. **Type dispatch rule**: Should `air_meta.meta` explicitly state "all types except `python_source`
+   (and future `c_source`) are dispatched to AiRVM by default — no `air_source` type needed"?
+
+2. **Naming canonical source**: Should `prelude.air` simply `require:` `air/air/air.air` and
+   re-export its intrinsics, making `air.air` the single source of canonical names?
+
+3. **`AiR/` merge target**: Does `air.air` live at `air/air/air.air` (folder-module convention)
+   or flat at the repo root as `air.air`?
+
+4. **`air_vm` as system or module**: `interpreter.py` is stateless (module-like), but Phase 2+
+   needs state. Should `air_vm.air` be `type: system` now, or start as `type: module` and
+   transition later?
+
+5. **`python_source` top-level format**: Confirm the fix — bare top-level keys, no wrapping `{}`.
+
+6. **`repl` lifecycle**: `repl.air` reads stdin / writes stdout with a loop — is it `type: system`
+   (has `init`/`start`/`stop`) or `type: module` (just a `main` function)?

@@ -1,0 +1,104 @@
+name: "air"
+type: "module"
+about: "
+AiR language specification defined in AiR itself.
+This module contains the core definitions for:
+- Primitive types and their operations
+- Table construction and manipulation
+- Control flow and special forms
+- Module/system lifecycle
+"
+
+# Primitives
+# Numbers can be integers or floats
+# Strings are double-quoted
+# Booleans are true/false  
+# Symbols are identifiers starting with letter or underscore
+# Atoms are quoted symbols 'atom
+
+# Tables - The universal data structure
+# Positional entries (arrays):
+# { entry0 entry1 entry2 }
+# 
+# Named entries (maps):
+# { key1: value1, key2: value2 }
+#
+# Mixed:
+# { entry0 entry1, key1: value1 }
+
+# Intrinsic Functions - Arithmetic
+add: (define (a b) { + a b })
+sub: (define (a b) { - a b })  
+mult: (define (a b) { * a b })
+div: (define (a b) { / a b })
+mod: (define (a b) { % a b })
+sqrt: (define (x) { sqrt x })
+exp: (define (x) { exp x })
+log: (define (x) { log x })
+
+# Intrinsic Functions - Comparison
+eq: (define (a b) { = a b })
+neq: (define (a b) { != a b })
+lt: (define (a b) { < a b })
+gt: (define (a b) { > a b })
+lte: (define (a b) { <= a b })
+gte: (define (a b) { >= a b })
+
+# Intrinsic Functions - Logic
+and: (define (a b) { and a b })
+or: (define (a b) { or a b })
+not: (define (a) { not a })
+
+# Intrinsic Functions - Type checking
+typeof: (define (x) { typeof x })
+is_number: (define (x) { = (typeof x) 'number })
+is_string: (define (x) { = (typeof x) 'string })
+is_table: (define (x) { = (typeof x) 'table })
+is_boolean: (define (x) { = (typeof x) 'boolean })
+
+# Intrinsic Functions - Table operations
+get: (define (table key) { <: table key })
+set: (define (table key val) { table key: val })
+keys: (define (table) { keys table })
+values: (define (table) { values table })
+merge: (define (t1 t2) { merge t1 t2 })
+
+# Special Forms (defined in interpreter, not pure functions)
+#
+# Conditional:
+# { if: condition, then: true-expr, else: false-expr }
+#
+# Loop with state:
+# { init: init-table, cond: cond-expr, loop: body-expr }
+#
+# Module import (immutable):
+# require: { module1: "path/to/module1.air", module2: "path/to/module2.air" }
+#
+# System instantiation (stateful):
+# initialize: { system1: "path/to/system1.air", system2: "path/to/system2.air" }
+
+# Definition (define functions at compile time)
+define: (special-form (name params body) 
+  { store name as function with params and body })
+
+# Assertion (for testing)  
+assert_eq: (define (expected actual)
+  { if: (eq expected actual) 
+    then: true
+    else: { error "assertion failed: " expected " != " actual } })
+
+assert_neq: (define (unexpected actual)
+  { if: (neq unexpected actual)
+    then: true
+    else: { error "assertion failed: " unexpected " == " actual } })
+
+# Promise-like evaluation: evaluate lazy table and return result
+evaluate: (define (lazy-expr) { <: lazy-expr })
+
+# Lazy table construction (remains unevaluated)
+# Use { } syntax - expressions inside are AST, not evaluated
+# Use ( ) syntax for immediate evaluation
+
+# Table with meta-parent for scope inheritance
+with_parent: (define (parent-table entries)
+  { _meta_table: parent-table, ... entries })

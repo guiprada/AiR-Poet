@@ -1,0 +1,248 @@
+name: "meta"
+type: "meta"
+about: "
+## META System: Deterministic AI-Driven Code Generation
+
+META is a methodology for describing computer problems in a language that AI can deterministically transform to code through iterative consensus development.
+
+### The Methodology Workflow
+
+The META system operates through iterative consensus-driven refinement:
+
+**Single Source of Truth: `.meta` file**
+- User-owned specification of what to build
+- Contains: concepts, constraints, examples, input `.air` reference files
+- May include questions, design decisions, refinements from previous iterations
+- Never auto-overwritten
+
+**AI-Generated Planning: `.prompt` file**  
+- Completely regenerated from scratch each iteration (never incremental)
+- Contains: implementation steps, rationale, design decisions, phase breakdown
+- Derived 100% from current `.meta` content
+- User reviews and may suggest merges back to `.meta`
+
+**Consensus Loop**
+
+```
+1. User writes/updates `.meta` file
+   ├── Add specifications, constraints, examples
+   ├── Include input `.air` reference files (part of specification)
+   └── Ask design questions
+
+2. AI reads `.meta` from scratch
+   └── Generates complete `.prompt` (from scratch, not incremental)
+
+3. User reviews `.prompt`
+   ├── Questions design decisions
+   ├── Merges useful insights back to `.meta`
+   └── Refines specifications
+
+4. Loop: goto step 2 (regenerate `.prompt` entirely)
+
+5. **Consensus reached** when `.meta` and `.prompt` align
+
+6. AI generates **output `.air` files from scratch**
+   ├── Implementation files (completely rebuilt each time)
+   ├── All tests passing
+   └── Deterministic: same `.meta` always yields same `.air` output
+```
+
+**Key Principle**: Neither `.prompt` nor output `.air` files are incrementally updated. Both are always generated from scratch based on current `.meta`. This ensures determinism and prevents drift.
+
+### Input vs Output `.air` Files
+
+**Input `.air` files** (part of `.meta` specification):
+- Reference implementations or examples provided by user
+- Show expected behavior or design patterns
+- Included in `.meta` document as `input_air:` list
+- Used to clarify intent, not as templates
+
+**Output `.air` files** (generated each iteration):
+- Implementation files generated from final consensus `.meta` + `.prompt`
+- Completely rebuilt from scratch each time (never incremental patches)
+- Must pass all tests defined in `.meta`
+- Deterministic: same `.meta` → same output
+
+### The Innovation
+- **Interactive consensus**: User and AI converge on design through file evolution
+- **Deterministic output**: Same `.meta` + `.prompt` always yields same implementation
+- **Deterministic representation**: AiR is expandable yet structurally consistent
+- **Layered modularity**: Clear separation of **submodules** (immutable, shared code) and **modules** (stateful execution environments)
+
+### Architecture: Modules vs Systems
+
+**Modules** (Pure, Immutable):
+- Pure functions and immutable constants libraries
+- Single import per running system via `require:` key
+- Shared fearlessly across all systems
+- Implemented as `.air` files or folders containing `.air` of same name (folder naming mirrors `.air` filename)
+- No mutable state; composition-only semantics - I contains only pure functions and constants.
+- Type: `module`
+
+**Systems** (Stateful Execution):
+- Execution environments with mutable state = `modules` + `data`
+- Can/should be instantiate multiple times via `initialize:` key
+- Manage lifecycle: `init` → `start` → `update` → `pause` → `stop`
+- Type: `system`
+
+**Terminology**: Think of it as **Module = Library**, **System = Instance**. Modules are pure; systems contain state and behavior.
+
+### AiR: Intermediary Representation Language
+
+AiR is a target language for AI to express systems deterministically. Key concepts:
+
+**Primitives**: numbers (float and integers), strings, booleans, symbols
+**Collections**: Tables (key-value maps with implicit and explicit indexing)
+**Expressions**: Lisp-like forms for computation and control flow
+**Module Import**: `require:` key imports immutable modules (pure functions/constants) into scope
+**System Instantiation**: `initialize:` key instantiates a system from another system definition with initial state
+
+Every file is an implicit top-level table with three mandatory fields (enforced best practice):
+- `name`: identifier for the table
+- `type`: determines required keys and semantic behavior (test, system, data, module, etc.)
+- Type-specific keys: e.g., systems require `init`, `pause`, `stop`; modules require function definitions
+
+### Supported Table Types
+# Intrinsic functions
+assert_eq, assert_neq, assert_less, assert_lesseq, ...
+add, sub, mult, div, mod, sqrt, exp, log, ...
+define, require, initialize, ...
+
+1. **test**: Validation logic with assertions
+   - Entries: numbered or implicit indexed assertions and/or key indexed assertions
+   - Operations: `assert_eq`, `assert_neq`
+
+2. **system**: Application with lifecycle and mutable state
+   - Keys: `init`, `pause`, `stop`, `start`, `update`, `require:` (modules), `initialize:` (subsystems), `data`, `tests`
+   - Lifecycle: Initialization → Running → Pausing/Checkpointing → Shutdown
+
+3. **module**: Pure functions and immutable constants library
+   - Keys: function/constant definitions
+   - Imported via `require:` in systems or other modules
+   - No state mutations
+
+4. **input_air**: Reference implementations and examples
+   - Not formally required, but clarifies user intent
+   - Examples of expected behavior or design patterns
+   - Listed in `.meta` document for AI reference
+
+5. **data**: Structured data with implicit indexing/indexing/key:indexing
+   - Values: primitives or nested tables (nested tables have required modules)
+   - Implicit indexing: values enumerated sequentially
+
+6. **computation**: Lisp expressions for calculations
+   - Forms: `{ add 1 2 }`, `( mul 3 4 )`
+   - Can be nested and assigned to table keys
+
+7. **logic**: Control flow expressions
+   - Forms: `{ if: cond then: true-expr else: false-expr }`
+   - Can be evaluated in AiRVM
+
+### AiRVM: The Execution Engine
+
+AiRVM interprets AiR files deterministically:
+- **Phase 1 (Python)**: AST tree walker for initial development
+- **Phase 2 (C)**: Lightning VM compiler for performance-critical paths
+- **Phase 3 (Embedded C)**: C-native lightning VM for production deployments
+
+### Output Files: Generated from Scratch Each Iteration
+
+Based on final consensus `.meta` + `.prompt`, AI generates:
+
+- `air.air`: AiR language formal definition
+- `air_vm.air`: AiRVM specification and behavior
+- `test_meta.air`: Validation test suite
+- `meta.air`: System lifecycle and orchestration
+- `init.air`, `pause.air`, `stop.air`: Lifecycle phases
+- `[name].air`: Implementation files/folders for each system/module
+
+**Guarantees**: 
+- All generated files pass tests defined in `.meta`
+- Same `.meta` state always produces identical output files
+- Output files are complete, requiring no manual edits
+"
+
+# Test suite for META system
+name: "test_meta"
+type: "test"
+# Basic assertion tests
+0: (assert_eq 0 0)
+1: (assert_neq 0 1)
+# Lisp expression evaluation
+2: (assert_eq (add 1 2) 3)
+3: (assert_eq (mul 2 3) 6)
+# Logic tests
+4: (assert_eq (if (eq 1 1) then "true" else "false") "true")
+5: (assert_eq (if (eq 1 2) then "true" else "false") "false")
+
+# System definition for META
+name: "meta"
+type: "system"
+init: "init.air"
+pause: "pause.air"
+stop: "stop.air"
+require: {
+    air: "air.air"
+    air_vm: "air_vm.air"
+}
+initialize: {
+    "meta.air"
+    "test_meta.air"
+    "air.air"
+    "air_vm.air"
+}
+tests: test_meta.air
+todo: {
+    "Phase 1: AiR Language Runtime (Interpreter)"
+    "  - Verify tokenizer/parser/interpreter in AiR-Poet work correctly"
+    "  - Build assertion framework (assert_eq, assert_neq, etc.)"
+    "  - Implement Lisp expression evaluation in interpreter"
+    ""
+    "Phase 2: Workflow Automation"
+    "  - Read .meta file (single source of truth)"
+    "  - Generate .prompt from scratch (complete, not incremental)"
+    "  - Implement consensus loop validation"
+    ""
+    "Phase 3: Module and System Loaders"
+    "  - Add module loader with require: semantics"
+    "  - Add system instantiator with initialize: semantics"
+    "  - Support folder-based module/system discovery"
+    ""
+    "Phase 4: Output Generation"
+    "  - Generate output .air files from scratch"
+    "  - Ensure all output .air files pass tests"
+    "  - Verify determinism: same .meta always yields same .air"
+    ""
+    "Phase 5: Lifecycle Management"
+    "  - Implement lifecycle management (init, start, update, pause, stop)"
+    "  - Build test framework for validation"
+    ""
+    "Phase 6: Performance"
+    "  - Implement Lightning Bytecode compiler"
+    "  - Create embedded C in python lightning VM"
+}
+
+# Data examples
+name: "air_primitives"
+type: "data"
+numbers: { 42 3.14 -7 }
+strings: { "hello" "world" }
+booleans: { true false }
+symbols: { add mul eq }
+
+# Computation examples
+name: "computational_examples"
+type: "computation"
+addition: { add 1 2 }
+multiplication: { mul 3 4 }
+nested_hybrid: { add (mul 2 3) 4 }
+nested_table: { add { mul 2 3 } 4 }
+nested_lisp: ( add ( mul 2 3 ) 4 )
+
+# Logic examples
+name: "logic_examples"
+type: "logic"
+equality_true: { if: (eq 1 1) then: "yes" else: "no" }
+equality_false: { if: (eq 1 2) then: "yes" else: "no" }
+nested_condition: { if: (and (eq 1 1) (gt 5 3)) then: "both true" else: "not both" }
+"

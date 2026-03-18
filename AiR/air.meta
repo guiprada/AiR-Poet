@@ -1,0 +1,95 @@
+name: "air"
+type: "meta"
+about: "
+## AiR: Intermediary Representation Language
+
+AiR is the target language for deterministic code generation by the META system.
+It is implemented as a table-based Lisp with lazy evaluation, mixed indexing, and scope inheritance.
+
+### Core Philosophy
+
+AiR treats everything as tables: data, code, and environment. This unified representation enables:
+- **Deterministic code generation**: AI outputs AST as data structures, not text strings
+- **Lazy evaluation**: Code remains unevaluated until explicitly requested
+- **Mixed indexing**: Arrays (positional) and maps (named keys) coexist seamlessly
+- **Module composition**: Pure modules via require:, stateful systems via initialize:
+
+### Language Features
+
+**Primitives**: numbers (int/float), strings, booleans, symbols, atoms
+**Collections**: Tables - the universal data structure
+  - Positional: entries indexed 0, 1, 2, ... (arrays)
+  - Named: entries with symbol keys (maps/records)
+  - Meta: special _meta_table parent for scope inheritance
+
+**Expressions**: Lisp-like forms in table notation
+  - Immediate: (+ 1 2) evaluates right away
+  - Lazy: {+ 1 2} remains as AST until evaluated
+  - Special forms: {if: cond, then: a, else: b}, {require: ...}, {initialize: ...}
+
+**Scope & Environment**: 
+  - Each table has optional _meta_table parent
+  - Lookup cascades: child -> parent -> parent's parent
+  - Mutation is local (doesn't affect parent)
+
+### Mandatory Table Fields
+
+Every top-level .air file must have:
+- name: identifier for the table
+- type: determines semantics and required keys
+- type-specific keys per the type definition
+
+### Table Types
+
+1. **test**: Validation logic
+   - Keys: numbered entries with assertions
+   - Semantics: execute assertions in order
+   
+2. **module**: Pure functions and constants
+   - Keys: function/constant definitions
+   - Semantics: imported with require:, never instantiated
+   
+3. **system**: Stateful application with lifecycle
+   - Keys: init, start, update, pause, stop, require:, initialize:, data, tests
+   - Semantics: instantiated with initialize:, manages execution
+   
+4. **data**: Structured data
+   - Keys: any field names or positioned entries
+   - Semantics: pure data, no behavior
+   
+5. **computation**: Arithmetic/logic operations
+   - Keys: expressions that compute values
+   - Semantics: evaluable on demand
+   
+6. **logic**: Control flow
+   - Keys: conditional/loop expressions
+   - Semantics: evaluable with side effects
+
+### Implementation Architecture
+
+AiR-Poet provides the runtime:
+- **Tokenizer**: Breaks source into tokens
+- **Parser**: Builds AST from tokens (TableNode graph)
+- **Interpreter**: Evaluates AST in environments with scope inheritance
+- **Lazy Evaluator**: Delays evaluation of { } forms until requested
+
+### Determinism Guarantees
+
+Same `.meta` + `.prompt` consensus produces identical implementation because:
+- Table insertion order is preserved (deterministic iteration)
+- Scope resolution follows fixed rules (cascade then local)
+- Function definitions are deterministic (pure input -> output)
+- All operations are referentially transparent
+
+### Integration with META System
+
+AiR serves as the intermediary between:
+- **Input**: User `.meta` specifications
+- **Processing**: AI `.prompt` planning  
+- **Output**: Executable `.air` implementation files
+
+The lazy evaluation model allows:
+- Generation and inspection of code before execution
+- Incremental consensus updates between user and AI
+- Non-destructive testing and validation
+"

@@ -15,7 +15,7 @@ The META system operates through iterative consensus-driven refinement:
 - May include questions, design decisions, refinements from previous iterations
 - Never auto-overwritten
 
-**AI-Generated Planning: `.prompt` file**  
+**AI-Generated Planning: `plan_<name>.md`**
 - Completely regenerated from scratch each iteration (never incremental)
 - Contains: implementation steps, rationale, design decisions, phase breakdown
 - Derived 100% from current `.meta` content
@@ -30,16 +30,16 @@ The META system operates through iterative consensus-driven refinement:
    └── Ask design questions
 
 2. AI reads `.meta` from scratch
-   └── Generates complete `.prompt` (from scratch, not incremental)
+   └── Generates complete `plan_<name>.md` (from scratch, not incremental)
 
-3. User reviews `.prompt`
+3. User reviews `plan_<name>.md`
    ├── Questions design decisions
    ├── Merges useful insights back to `.meta`
    └── Refines specifications
 
-4. Loop: goto step 2 (regenerate `.prompt` entirely)
+4. Loop: goto step 2 (regenerate `plan_<name>.md` entirely)
 
-5. **Consensus reached** when `.meta` and `.prompt` align
+5. **Consensus reached** when `.meta` and `plan_<name>.md` align
 
 6. AI generates **output `.air` files from scratch**
    ├── Implementation files (completely rebuilt each time)
@@ -47,7 +47,7 @@ The META system operates through iterative consensus-driven refinement:
    └── Deterministic: same `.meta` always yields same `.air` output
 ```
 
-**Key Principle**: Neither `.prompt` nor output `.air` files are incrementally updated. Both are always generated from scratch based on current `.meta`. This ensures determinism and prevents drift.
+**Key Principle**: Neither `plan_<name>.md` nor output `.air` files are incrementally updated. Both are always generated from scratch based on current `.meta`. This ensures determinism and prevents drift.
 
 ### Input vs Output `.air` Files
 
@@ -147,7 +147,7 @@ AiRVM interprets AiR files deterministically:
 
 ### Output Files: Generated from Scratch Each Iteration
 
-Based on final consensus `.meta` + `.prompt`, AI generates:
+Based on final consensus `.meta` + `plan_<name>.md`, AI generates:
 
 - `air.air`: AiR language formal definition
 - `air_vm.air`: AiRVM specification and behavior

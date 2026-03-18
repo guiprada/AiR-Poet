@@ -1,14 +1,14 @@
-# meta.prompt - META System Implementation Plan
+# plan_air_meta - META System Implementation Plan
 
 ## Overview
-This prompt describes the sequential steps, rationale, and implementation files needed to construct the META system - a methodology for AI-driven, deterministic code generation through iterative file-based consensus.
+This plan describes the sequential steps, rationale, and implementation files needed to construct the META system - a methodology for AI-driven, deterministic code generation through iterative file-based consensus.
 
 ## Rationale
 
-The META system solves the problem of translating high-level problem descriptions into concrete implementations deterministically. By using parallel descriptions (`.meta` and `.prompt` files), the system enables:
+The META system solves the problem of translating high-level problem descriptions into concrete implementations deterministically. By using parallel descriptions (`.meta` and `plan_*.md` files), the system enables:
 
 1. **User-driven specification** via `.meta` files (what to build)
-2. **AI-driven planning** via `.prompt` files (how to build it)
+2. **AI-driven planning** via `plan_*.md` files (how to build it)
 3. **Consensus-driven iteration** where both parties converge on implementation
 4. **Deterministic output** in AiR (intermediary representation language)
 5. **Executable system** via AiRVM interpretation and module/system composition
@@ -154,7 +154,7 @@ Implement core built-in functions:
 ### Phase 6: Output Generation and Testing
 **File:** (generated outputs)
 
-1. Accept `.meta` + `.prompt` consensus as input
+1. Accept `.meta` + `plan_*.md` consensus as input
 2. Generate executable `.air` implementation files
 3. Compile/generate module and system loader files
 4. Validate generated code against `test_meta.air`
@@ -241,8 +241,8 @@ nested: {
 ## Iteration Loop
 
 1. User provides/refines `.meta` file with module/system definitions
-2. AI generates `.prompt` file (this plan)
-3. User reviews `.prompt`, suggests refinements back to `.meta`
+2. AI generates `plan_<name>.md` (this plan)
+3. User reviews `plan_<name>.md`, suggests refinements back to `.meta`
 4. Loop repeats until consensus is reached
 5. AI implements final consensus in `.air` files
 6. Run `test_meta.air` validates complete implementation
@@ -256,7 +256,7 @@ nested: {
 ✓ System instantiation via `initialize:` works correctly
 ✓ Lifecycle phases execute in correct order
 ✓ Generated implementation matches consensus description
-✓ Deterministic: same `.meta` + `.prompt` → identical implementation
+✓ Deterministic: same `.meta` + `plan_*.md` → identical implementation
 ✓ Multiple system instantiations remain independent
 
 ## Implementation Roadmap

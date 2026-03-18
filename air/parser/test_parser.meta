@@ -1,0 +1,11 @@
+name: "test_parser"
+type: "test"
+about: "Unit tests for the parser module"
+tests: "test_parser.py"
+
+covers: {
+    parse_print_string:  "parse (print \"hello\") into CallExpressionNode"
+    parse_print_number:  "parse (print 42) into CallExpressionNode"
+    parse_empty_input:   "empty token list returns None"
+    parse_nested_parens: "nested (print (+ 1 2)) parses correctly"
+}

@@ -1,0 +1,32 @@
+name: "ast_node"
+type: "module"
+about: "AiR AST node types defined in AiR notation — placeholder for self-hosting"
+
+ASTNode: {
+    about: "Base type for all AST nodes"
+}
+
+IdentifierNode: {
+    about: "Named reference"
+    fields: { value: string }
+}
+
+StringNode: {
+    about: "String literal (quotes stripped on construction)"
+    fields: { value: string }
+}
+
+NumberNode: {
+    about: "Numeric literal — int or float"
+    fields: { value: number, type: symbol }
+}
+
+TableNode: {
+    about: "Table — lazy code block, array, and dictionary in one"
+    fields: {
+        elements:     list
+        map:          table
+        _meta_table:  TableNode
+        entries:      list
+    }
+}

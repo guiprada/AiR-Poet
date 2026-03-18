@@ -1,0 +1,12 @@
+name: "test_interpreter"
+type: "test"
+about: "Unit tests for the interpreter core evaluation functions"
+tests: "test_interpreter.py"
+
+covers: {
+    add:                     "(add 1 2) → 3"
+    add_operator:            "(+ 10 15) → 25"
+    add_negative_numbers:    "(add -1 -2) → -3"
+    print_string:            "(print \"hello\") outputs hello"
+    evaluate_simple_arithmetic: "full pipeline: tokenize → parse → interpret (+ 1 2)"
+}

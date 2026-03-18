@@ -1,10 +1,10 @@
-from parser import parse, parse_program
-from tokenizer import tokenize
-from ASTNode import (ASTNode, TableNode, CallExpressionNode, NumberNode,
+from air.parser.parser import parse, parse_program
+from air.tokenizer.tokenizer import tokenize
+from air.ast_node.ast_node import (ASTNode, TableNode, CallExpressionNode, NumberNode,
                      StringNode, IdentifierNode, SymbolNode,
                      IndexAccessNode, FieldAccessNode, EvalNode, TableCallNode)
 
-import prelude as prelude
+import air.prelude.prelude as prelude
 LOOKUP = {name: getattr(prelude, name) for name in dir(prelude) if callable(getattr(prelude, name))}
 LOOKUP.update(prelude.OPERATOR_DICT)
 LOOKUP.update(prelude.build_builtin_lookup())

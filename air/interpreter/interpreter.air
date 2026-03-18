@@ -1,0 +1,21 @@
+name: "interpreter"
+type: "module"
+about: "AiR interpreter defined in AiR notation — placeholder for self-hosting"
+
+interpret: {
+    about: "Evaluate a single AST node in an environment"
+    input:  { ast: ASTNode, env: TableNode }
+    output: { value: any }
+}
+
+interpret_program: {
+    about: "Evaluate a full program (file or multi-expression REPL input) in env"
+    input:  { ast: ASTNode, env: TableNode }
+    output: { value: any }
+}
+
+eval_table: {
+    about: "Evaluate a TableNode as a code block — creates child env, runs entries top-down"
+    input:  { table: TableNode, env: TableNode }
+    output: { value: any }
+}

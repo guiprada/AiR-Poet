@@ -1,5 +1,5 @@
 import unittest
-from tokenizer import tokenize, Token
+from air.tokenizer.tokenizer import tokenize, Token
 
 
 class TestTokenize(unittest.TestCase):

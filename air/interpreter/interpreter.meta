@@ -1,0 +1,31 @@
+name: "interpreter"
+type: "meta"
+about: "Evaluation engine — traverses the AST and computes values"
+
+inputs: {
+    ast: { type: "ASTNode", about: "parsed AST node" }
+    env: { type: "TableNode", about: "current lexical environment (scope)" }
+}
+
+outputs: {
+    value: { type: "any", about: "evaluated Python value" }
+}
+
+special_forms: {
+    define:       "(define key value) — bind in current env"
+    eval:         "(eval table) — explicitly evaluate a lazy table"
+    if_then_else: "{ if: cond, then: {...}, else: {...} } — conditional"
+    init_cond_loop: "{ init: {...}, cond: expr, loop: {...} } — iteration"
+}
+
+evaluation_model: {
+    numbers:     "return Python int/float"
+    strings:     "return stripped string value"
+    symbols:     "return stripped symbol value"
+    tables:      "lazy — return as-is unless explicitly eval'd"
+    identifiers: "look up in env chain, then in LOOKUP (prelude + builtins)"
+    eval_op:     "<: expr — evaluate a table as a code block"
+}
+
+implementation: "interpreter.py"
+tests: { "test_interpreter.py" "test_print.py" }

@@ -1,0 +1,19 @@
+name: "repl"
+type: "meta"
+about: "Interactive Read-Eval-Print Loop for AiR development"
+
+commands: {
+    "run <path>": "load and execute an .air or .poet file"
+    "env":        "print the current environment"
+    "exit":       "quit the REPL"
+}
+
+entry_point: "python -m air.repl.repl"
+
+design: {
+    env:       "a single persistent TableNode for the session"
+    errors:    "caught per-line — REPL continues after errors"
+    multiline: "not yet supported — each input line is one expression"
+}
+
+implementation: "repl.py"

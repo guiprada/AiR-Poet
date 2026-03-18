@@ -1,0 +1,17 @@
+name: "test_ast_node_hashes"
+type: "test"
+about: "Unit tests for AST node hashing correctness and performance"
+tests: "test_ast_node_hashes.py"
+
+covers: {
+    identifier_node_hash:          "same name → same hash"
+    string_node_hash:              "same value → same hash"
+    number_node_hash:              "same number → same hash"
+    call_expression_node_hash:     "same callee + args → same hash"
+    table_node_hash:               "same elements + map → same hash"
+    hash_type_safety:              "different node types with same value → different hash"
+    unicode_escape_sequences:      "NFC vs NFD normalization"
+    hash_performance_multiple_sizes: "hash in O(1) for large tables"
+    hash_stability:                "hash is stable across recreations"
+    hash_collision_resistance:     "IdentifierNode vs StringNode with same value"
+}

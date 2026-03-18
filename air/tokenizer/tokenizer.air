@@ -1,0 +1,14 @@
+name: "tokenizer"
+type: "module"
+about: "AiR tokenizer defined in AiR notation — placeholder for self-hosting"
+
+tokenize: {
+    about: "Convert a source string into a list of tokens"
+    input:  { source: string }
+    output: { tokens: list }
+}
+
+Token: {
+    about: "A single lexical token with type, value, and source position"
+    fields: { token_type: symbol, value: string, line: number, column: number }
+}

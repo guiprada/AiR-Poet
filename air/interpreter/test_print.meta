@@ -1,0 +1,13 @@
+name: "test_print"
+type: "test"
+about: "Unit tests for the print built-in via the interpreter"
+tests: "test_print.py"
+
+covers: {
+    print_string:          "(print \"hello\") → hello"
+    print_number:          "(print 42) → 42"
+    print_empty_string:    "(print \"\") → empty output"
+    print_with_spaces:     "(print \"a b c\") → a b c"
+    print_missing_paren:   "missing ) raises error"
+    print_unmatched_quotes: "unmatched quote raises error"
+}

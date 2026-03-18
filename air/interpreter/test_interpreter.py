@@ -1,10 +1,10 @@
 import unittest
-from tests.utils import interpret_ast_and_capture_output
+from air.interpreter.utils import interpret_ast_and_capture_output
 
-from interpreter import interpret
-from parser import parse
-from ASTNode import CallExpressionNode, NumberNode, StringNode, IdentifierNode, TableNode
-from tokenizer import tokenize
+from air.interpreter.interpreter import interpret
+from air.parser.parser import parse
+from air.ast_node.ast_node import CallExpressionNode, NumberNode, StringNode, IdentifierNode, TableNode
+from air.tokenizer.tokenizer import tokenize
 
 class TestInterpreter(unittest.TestCase):
 
@@ -32,7 +32,7 @@ class TestInterpreter(unittest.TestCase):
         src = '(+ 1 2)'
         tokens = tokenize(src)
         ast = parse(tokens)
-        result = interpret(ast, TableNode())  # empty env
+        result = interpret(ast, TableNode())
         self.assertEqual(result, 3)
 
 if __name__ == "__main__":

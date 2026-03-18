@@ -1,0 +1,16 @@
+name: "test_ast_node"
+type: "test"
+about: "Unit tests for TableNode mechanics and parser integration"
+tests: "test_ast_node.py"
+
+covers: {
+    table_elements_and_map:   "positional elements and named map access"
+    meta_table_fallback:      "scope chain lookup via _meta_table"
+    setitem_map:              "update existing named entry"
+    setitem_map_missing:      "raise KeyError for undefined key"
+    define_automatic_extend:  "define() extends elements list to fit index"
+    append:                   "append() adds positional element"
+    table_literal_parsing:    "parse {1 2 : \"a\" 3 4, \"b\" : 5} correctly"
+    lazy_table_literal:       "STUB — lazy evaluation semantics"
+    eval_special_form:        "STUB — (eval table) special form"
+}

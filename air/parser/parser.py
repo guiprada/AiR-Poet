@@ -1,4 +1,4 @@
-from ASTNode import (IdentifierNode, StringNode, NumberNode, SymbolNode,
+from air.ast_node.ast_node import (IdentifierNode, StringNode, NumberNode, SymbolNode,
                      TableNode, CallExpressionNode,
                      IndexAccessNode, FieldAccessNode, EvalNode, TableCallNode)
 

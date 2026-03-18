@@ -1,0 +1,11 @@
+name: "prelude"
+type: "module"
+about: "AiR prelude defined in AiR notation — placeholder for self-hosting"
+
+add:      { about: "add two numbers",      input: { x: number, y: number }, output: number }
+subtract: { about: "subtract y from x",    input: { x: number, y: number }, output: number }
+multiply: { about: "multiply two numbers", input: { x: number, y: number }, output: number }
+divide:   { about: "divide x by y",        input: { x: number, y: number }, output: number }
+modulus:  { about: "x mod y",              input: { x: number, y: number }, output: number }
+exponent: { about: "x to the power of y",  input: { x: number, y: number }, output: number }
+floor_divide: { about: "floor division",   input: { x: number, y: number }, output: number }

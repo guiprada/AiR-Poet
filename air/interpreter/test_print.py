@@ -1,6 +1,6 @@
 import unittest
-from tests.utils import interpret_and_capture_output
-from ASTNode import TableNode
+from air.interpreter.utils import interpret_and_capture_output
+from air.ast_node.ast_node import TableNode
 
 class TestReplPrint(unittest.TestCase):
     """Test suite for TableNode Scheme REPL print command."""

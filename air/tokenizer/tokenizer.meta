@@ -1,0 +1,26 @@
+name: "tokenizer"
+type: "meta"
+about: "Lexical analysis — converts AiR source code into a flat token stream"
+
+inputs: {
+    source: { type: "string", about: "raw AiR source code" }
+}
+
+outputs: {
+    tokens: { type: "list[Token]", about: "ordered list of Token objects" }
+}
+
+token_types: {
+    lparen rparen lbrace rbrace lbracket rbracket
+    colon comma dot eval_op
+    string symbol number identifier
+}
+
+errors: {
+    unmatched_paren:  "Unmatched parentheses"
+    unmatched_quote:  "Unmatched double-quote"
+    invalid_char:     "Unexpected character in source"
+}
+
+implementation: "tokenizer.py"
+tests: "test_tokenizer.py"

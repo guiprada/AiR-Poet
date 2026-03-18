@@ -1,0 +1,27 @@
+name: "parser"
+type: "meta"
+about: "Syntax analysis — converts a token stream into an Abstract Syntax Tree (AST)"
+
+inputs: {
+    tokens: { type: "list[Token]", about: "token stream from tokenizer" }
+}
+
+outputs: {
+    ast: { type: "ASTNode", about: "root AST node (TableNode for programs)" }
+}
+
+entry_points: {
+    parse:         "parse a single expression"
+    parse_program: "parse a full file — result is a TableNode (file IS a table)"
+}
+
+operators: {
+    index_access: "t[key]"
+    field_access: "t.field"
+    table_call:   "fn{args}"
+    eval_op:      "<: expr"
+    lisp_call:    "(fn arg1 arg2 ...)"
+}
+
+implementation: "parser.py"
+tests: "test_parser.py"

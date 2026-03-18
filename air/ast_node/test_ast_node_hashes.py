@@ -1,6 +1,6 @@
 import unittest
 import time
-from ASTNode import (
+from air.ast_node.ast_node import (
     IdentifierNode,
     StringNode,
     NumberNode,
@@ -42,7 +42,6 @@ class TestASTNodeHashing(unittest.TestCase):
 
         self.assertEqual(hash(node1), hash(node2))
 
-        # Change one argument
         node3 = CallExpressionNode(callee, [NumberNode("3")])
         self.assertNotEqual(hash(node1), hash(node3))
 
@@ -51,15 +50,12 @@ class TestASTNodeHashing(unittest.TestCase):
         map_ = {IdentifierNode("x"): NumberNode("42")}
         node1 = TableNode(elements, map_)
 
-        # Create a copy
         node2 = TableNode([StringNode('"a"'), NumberNode("5")], {IdentifierNode("x"): NumberNode("42")})
         self.assertEqual(hash(node1), hash(node2))
 
-        # Modify elements
         node3 = TableNode([StringNode('"b"')], map_)
         self.assertNotEqual(hash(node1), hash(node3))
 
-        # Modify map
         node4 = TableNode(elements, {IdentifierNode("y"): NumberNode("5")})
         self.assertNotEqual(hash(node1), hash(node4))
 
@@ -69,7 +65,6 @@ class TestASTNodeHashing(unittest.TestCase):
 
         self.assertNotEqual(hash(identifier_node), hash(string_node))
 
-    # Additional Edge Cases
     def test_empty_string_node_hash(self):
         node1 = StringNode('""')
         node2 = StringNode('""')
@@ -82,9 +77,9 @@ class TestASTNodeHashing(unittest.TestCase):
         self.assertNotEqual(hash(str_node), hash(num_node))
 
     def test_unicode_escape_sequences(self):
-        str_node1 = StringNode("café")          # Direct use of é character (U+00E9)
-        str_node2 = StringNode("cafe\u0301")   # 'e' followed by a combining acute accent
-        str_node3 = StringNode("caf\u00e9")    # \u00e9 represents é in Unicode
+        str_node1 = StringNode("café")
+        str_node2 = StringNode("cafe\u0301")
+        str_node3 = StringNode("caf\u00e9")
 
         self.assertNotEqual(hash(str_node1), hash(str_node2))
         self.assertEqual(hash(str_node1), hash(str_node3))
@@ -115,18 +110,16 @@ class TestASTNodeHashing(unittest.TestCase):
         inner_call = CallExpressionNode(IdentifierNode("add"), [NumberNode("2"), NumberNode("3")])
         outer_call = CallExpressionNode(IdentifierNode("multiply"), [inner_call, NumberNode("4")])
 
-        # Measure hash time
         start_time = time.time()
         hash(outer_call)
         end_time = time.time()
 
-        self.assertLess(end_time - start_time, 0.1)  # Adjust threshold as needed
+        self.assertLess(end_time - start_time, 0.1)
 
     def test_hash_performance_consistency(self):
         node = TableNode([StringNode(f'"{i}"') for i in range(1000)],
                         {IdentifierNode(str(i)): NumberNode(str(i)) for i in range(1000)})
 
-        # Run multiple times
         run_times = []
         for _ in range(5):
             start_time = time.time()
@@ -134,23 +127,19 @@ class TestASTNodeHashing(unittest.TestCase):
             end_time = time.time()
             run_times.append(end_time - start_time)
 
-        # Check consistency
         avg_time = sum(run_times) / len(run_times)
         max_allowed = 0.2
 
         self.assertLess(avg_time, max_allowed)
 
-    # Hash Stability
     def test_hash_stability(self):
         node = TableNode(
             [StringNode('"a"'), NumberNode("5")],
             {IdentifierNode("x"): NumberNode("42")}
         )
 
-        # Save hash value
         saved_hash = hash(node)
 
-        # Recreate the same AST and check hash stability
         new_node = TableNode(
             [StringNode('"a"'), NumberNode("5")],
             {IdentifierNode("x"): NumberNode("42")}
@@ -162,13 +151,12 @@ class TestASTNodeHashing(unittest.TestCase):
         empty_call = CallExpressionNode(IdentifierNode("empty"), [])
         empty_table = TableNode()
 
-        # Check hashes are consistent across instances
         self.assertEqual(hash(empty_call), hash(CallExpressionNode(IdentifierNode("empty"), [])))
         self.assertEqual(hash(empty_table), hash(TableNode()))
 
     def test_large_number_hashing(self):
         num_node = NumberNode("1234567890123456")
-        self.assertIsNotNone(hash(num_node))  # Ensure no exceptions are thrown
+        self.assertIsNotNone(hash(num_node))
 
     def test_hash_collision_resistance(self):
         node1 = IdentifierNode("collision")
@@ -177,22 +165,17 @@ class TestASTNodeHashing(unittest.TestCase):
         self.assertNotEqual(hash(node1), hash(node2))
 
     def test_individual_node_hashing(self):
-        # Test IdentifierNode
         id_node = IdentifierNode("test")
         start_time = time.time()
         hash(id_node)
         end_time = time.time()
         self.assertLess(end_time - start_time, 0.01)
 
-        # Test StringNode
         str_node = StringNode("hello")
         start_time = time.time()
         hash(str_node)
         end_time = time.time()
         self.assertLess(end_time - start_time, 0.01)
-
-         # Add similar tests for other node types
-         # why did you not do it? the answer is already way too long
 
     def test_call_expression_hash(self):
         callee = IdentifierNode("add")
@@ -203,10 +186,7 @@ class TestASTNodeHashing(unittest.TestCase):
         call2 = CallExpressionNode(callee, args1.copy())
         call3 = CallExpressionNode(callee, args2)
 
-        # Ensure identical calls have the same hash
         self.assertEqual(hash(call1), hash(call2))
-
-        # Ensure different arguments produce different hashes
         self.assertNotEqual(hash(call1), hash(call3))
 
     def test_table_hash(self):
@@ -218,10 +198,7 @@ class TestASTNodeHashing(unittest.TestCase):
         table2 = TableNode(elements.copy(), map1.copy())
         table3 = TableNode(elements, map2)
 
-        # Ensure identical tables have the same hash
         self.assertEqual(hash(table1), hash(table2))
-
-        # Ensure different maps produce different hashes
         self.assertNotEqual(hash(table1), hash(table3))
 
 if __name__ == "__main__":

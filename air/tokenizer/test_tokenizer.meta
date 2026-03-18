@@ -1,0 +1,15 @@
+name: "test_tokenizer"
+type: "test"
+about: "Unit tests for the tokenizer module"
+tests: "test_tokenizer.py"
+
+covers: {
+    tokenize_print_string:     "basic (print \"hello\") tokenization"
+    tokenize_print_number:     "numeric literal tokenization"
+    tokenize_empty_string:     "empty string token"
+    tokenize_with_spaces:      "string with spaces"
+    tokenize_negative_number:  "negative number literal"
+    tokenize_missing_paren:    "error on unmatched parenthesis"
+    tokenize_unmatched_quotes: "error on unmatched quote"
+    tokenize_empty_input:      "empty source returns empty list"
+}

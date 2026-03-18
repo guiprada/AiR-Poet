@@ -1,0 +1,15 @@
+name: "parser"
+type: "module"
+about: "AiR parser defined in AiR notation — placeholder for self-hosting"
+
+parse: {
+    about: "Parse a single expression from a token list"
+    input:  { tokens: list }
+    output: { ast: ASTNode }
+}
+
+parse_program: {
+    about: "Parse a sequence of top-level expressions — a file is a table"
+    input:  { tokens: list }
+    output: { ast: TableNode }
+}

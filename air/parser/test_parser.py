@@ -1,6 +1,7 @@
 import unittest
-from tokenizer import tokenize
-from parser import parse, CallExpressionNode, StringNode, NumberNode, IdentifierNode
+from air.tokenizer.tokenizer import tokenize
+from air.parser.parser import parse
+from air.ast_node.ast_node import CallExpressionNode, StringNode, NumberNode, IdentifierNode
 
 
 class TestParser(unittest.TestCase):

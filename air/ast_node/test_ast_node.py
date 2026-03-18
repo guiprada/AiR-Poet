@@ -1,8 +1,8 @@
 import unittest
-from ASTNode import TableNode, NumberNode, StringNode
-from parser import parse
-from tokenizer import tokenize
-from interpreter import LOOKUP
+from air.ast_node.ast_node import TableNode, NumberNode, StringNode
+from air.parser.parser import parse
+from air.tokenizer.tokenizer import tokenize
+from air.interpreter.interpreter import LOOKUP
 
 class TestTable(unittest.TestCase):
 
@@ -42,7 +42,6 @@ class TestTable(unittest.TestCase):
         self.assertEqual(t[StringNode('x')].value, 99)
 
     def test_setitem_map(self):
-        # Updated to use a literal node for the initial value
         t = TableNode(
             [],
             {
@@ -55,11 +54,11 @@ class TestTable(unittest.TestCase):
     def test_setitem_map_missing(self):
         t = TableNode()
         with self.assertRaises(KeyError):
-            t[StringNode('missing')] = NumberNode('123')          # should raise
+            t[StringNode('missing')] = NumberNode('123')
 
     def test_define_automatic_extend(self):
         t = TableNode()
-        t.define(NumberNode('3'), NumberNode('99'))                  # extends to index 3
+        t.define(NumberNode('3'), NumberNode('99'))
         self.assertEqual(len(t.elements), 4)
         self.assertEqual(t[NumberNode('3')].value, 99)
 
@@ -86,28 +85,11 @@ class TestTable(unittest.TestCase):
     def test_lazy_table_literal(self):
         #STUB
         print('Add eval <TableNode> : and implement test_lazy_table_literal this test :)')
-        # src = '{ "foo" : 1 + 1, 2 }'
-        # tokens = tokenize(src)
-        # ast = parse(tokens)
-        # # interpret() should return a TableNode with *unevaluated* elements
-        # self.assertIsInstance(ast, TableNode)
-        # # now eval the table
-        # runtime_tbl = eval_table(ast, TableNode(meta_table=None))
-        # # after eval, the runtime table should contain the evaluated values
-        # self.assertIsInstance(runtime_tbl, TableNode)
-        # self.assertEqual(runtime_tbl['foo'].value, 2)   # 1+1 = 2
 
     # ##### Special form #eval# #####
     def test_eval_special_form(self):
         #STUB
         print('Add eval <TableNode> : and implement test_eval_special_form test :)')
-        # eval({ 1 : 2 }) # should evaluate to itself
-        # src = 'eval { 1 : 2 }'
-        # tokens = tokenize(src)
-        # ast = parse(tokens)
-        # env = TableNode()
-        # result = interpret(ast, env)
-        # self.assertEqual(result, 2)   # eval returns the first positional item
 
 if __name__ == '__main__':
     unittest.main()

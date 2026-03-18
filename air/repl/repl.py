@@ -4,7 +4,7 @@ Table Scheme REPL
 A minimal Read-Eval-Print Loop for interactive development and testing.
 
 Usage:
-    python table_scheme/repl.py
+    python -m air.repl.repl
 
 This REPL currently supports the 'print' command and 'exit' command.
 Extend it step by step to support parsing and evaluation.
@@ -15,10 +15,10 @@ Example:
     >>> exit
     Bye!
 """
-from tokenizer import tokenize
-from parser import parse, parse_program
-from interpreter import interpret, interpret_program, load_file
-from ASTNode import TableNode
+from air.tokenizer.tokenizer import tokenize
+from air.parser.parser import parse, parse_program
+from air.interpreter.interpreter import interpret, interpret_program, load_file
+from air.ast_node.ast_node import TableNode
 
 def main():
     print("Table Scheme REPL. Type 'exit' to quit.")

@@ -1,0 +1,10 @@
+name: "repl"
+type: "module"
+about: "AiR REPL defined in AiR notation — placeholder for self-hosting"
+
+main: {
+    about: "Start the interactive REPL session"
+    input:  {}
+    output: {}
+    side_effects: { "reads stdin", "writes stdout" }
+}

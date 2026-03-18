@@ -1,0 +1,26 @@
+name: "ast_node"
+type: "meta"
+about: "Abstract Syntax Tree node types — data model for parsed AiR programs"
+
+node_types: {
+    IdentifierNode:     "a named reference (variable or function name)"
+    StringNode:         "a double-quoted string literal"
+    SymbolNode:         "a single-quoted symbol literal"
+    NumberNode:         "an integer or float literal"
+    TableNode:          "a {} table: positional elements + named map + meta_table scope chain"
+    CallExpressionNode: "a Lisp-style call: (fn arg1 arg2 ...)"
+    TableCallNode:      "a table-style call: fn{args}"
+    IndexAccessNode:    "index access: t[key]"
+    FieldAccessNode:    "field access: t.field"
+    EvalNode:           "explicit evaluation: <: expr"
+}
+
+design: {
+    hashing:     "all nodes are hashable so they can serve as table keys"
+    equality:    "structural equality by value, not identity"
+    lazy:        "TableNode is lazy by default — only evaluated when explicitly called"
+    meta_table:  "TableNode._meta_table provides parent scope for lexical scoping"
+}
+
+implementation: "ast_node.py"
+tests: { "test_ast_node.py" "test_ast_node_hashes.py" }

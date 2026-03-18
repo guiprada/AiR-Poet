@@ -1,9 +1,9 @@
 import sys
 from io import StringIO
-from interpreter import interpret  # Corrected import
-from parser import parse # needed for AST generation
-from tokenizer import tokenize  # needed for tokenization
-from ASTNode import TableNode
+from air.interpreter.interpreter import interpret
+from air.parser.parser import parse
+from air.tokenizer.tokenizer import tokenize
+from air.ast_node.ast_node import TableNode
 
 def interpret_and_capture_output(code: str, env: TableNode) -> str:
     """Interprets a string of code and captures the output."""

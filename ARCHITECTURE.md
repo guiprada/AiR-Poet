@@ -13,8 +13,10 @@ AiR-Poet is the **implementation and runtime** for the META system. It contains:
 ## Architecture
 
 AiR-Poet implements three layers:
+The system is currently being reorganized to best fit the meta format itself, the in the root that are pertinent to other systems should be moved to their folder as they are identified and incorporated.
+The project targets the python language. We should have a AiR representation for a python source code. Perhaps a type: 'python', with some more versioning keys would suffice. 
 
-### Layer 1: AiR Language Runtime
+### Layer 1: AiR Language Runtime(air/)
 Canonical implementation of the AiR language (tokenization → parsing → interpretation).
 
 **Files:**
@@ -26,7 +28,7 @@ Canonical implementation of the AiR language (tokenization → parsing → inter
 
 **Key Feature**: Lazy evaluation via `{ }` table form (stays as AST) vs immediate evaluation via `( )` form.
 
-### Layer 2: META System
+### Layer 2: META System(air_meta/)
 Implements the consensus-driven iteration workflow:
 - ✅ `.meta` files (specifications)
 - ✅ `.prompt` files (plans)
@@ -39,7 +41,7 @@ Implements the consensus-driven iteration workflow:
 
 **Role**: AiR-Poet reads `.meta` and `.prompt` files, interprets them, and generates executable `.air` implementations.
 
-### Layer 3: AiRVM & Systems
+### Layer 3: AiRVM & Systems(air_vm/)
 Extended runtime for complex scenarios:
 - ✅ Basic interpreter (Python tree walker)
 - 🔲 Lightning compiler (C backend)

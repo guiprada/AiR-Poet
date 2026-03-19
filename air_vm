@@ -1,0 +1,83 @@
+#!/usr/bin/env python3
+"""
+air_vm — AiR language VM entry point.
+
+Usage:
+    ./air_vm <program.air> [args...]
+
+Loads and interprets a .air program, then dispatches based on the 'type'
+binding the program leaves in its top-level environment.
+
+Supported types:
+    python_source   run the .py file named by 'name', resolved relative
+                    to the .air file, with remaining args as sys.argv.
+"""
+import os
+import runpy
+import sys
+
+# Ensure the project root (directory of this script) is on the path so that
+# the 'air' package is importable when running from any working directory.
+_ROOT = os.path.dirname(os.path.abspath(__file__))
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+
+from air.interpreter.interpreter import load_file, interpret_program  # noqa: E402
+from air.ast_node.ast_node import TableNode, IdentifierNode            # noqa: E402
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: air_vm <program.air> [args...]", file=sys.stderr)
+        sys.exit(1)
+
+    air_file   = sys.argv[1]
+    extra_args = sys.argv[2:]
+
+    # ── load & interpret ──────────────────────────────────────────────────────
+    try:
+        ast = load_file(air_file)
+    except FileNotFoundError as e:
+        print(f"air_vm: {e}", file=sys.stderr)
+        sys.exit(1)
+    except ValueError as e:
+        print(f"air_vm: parse error — {e}", file=sys.stderr)
+        sys.exit(1)
+
+    env = TableNode()
+    try:
+        interpret_program(ast, env)
+    except Exception as e:
+        print(f"air_vm: runtime error — {e}", file=sys.stderr)
+        sys.exit(1)
+
+    # ── dispatch ──────────────────────────────────────────────────────────────
+    type_key = IdentifierNode("type")
+    name_key = IdentifierNode("name")
+
+    if type_key not in env:
+        print(f"air_vm: '{air_file}' does not define 'type'", file=sys.stderr)
+        sys.exit(1)
+
+    prog_type = env[type_key]
+
+    if prog_type == "python_source":
+        if name_key not in env:
+            print("air_vm: python_source requires a 'name' binding", file=sys.stderr)
+            sys.exit(1)
+        prog_name = env[name_key]
+        air_dir   = os.path.dirname(os.path.abspath(air_file))
+        py_path   = os.path.join(air_dir, prog_name)
+        if not os.path.isfile(py_path):
+            print(f"air_vm: python source not found: {py_path}", file=sys.stderr)
+            sys.exit(1)
+        sys.argv = [py_path] + extra_args
+        runpy.run_path(py_path, run_name="__main__")
+
+    else:
+        print(f"air_vm: unknown program type {prog_type!r}", file=sys.stderr)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

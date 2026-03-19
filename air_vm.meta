@@ -1,0 +1,19 @@
+name: "air_vm"
+type: "system"
+about: "
+AiR VM — the executable entry point for the AiR language runtime.
+
+Loads a .air program file, interprets it with the tree-walking interpreter,
+and dispatches on the top-level 'type' binding:
+
+  python_source   run the .py file named by 'name' (relative to the .air
+                  file) with remaining CLI args forwarded as sys.argv.
+
+Usage:
+  ./air_vm <program.air> [args...]
+
+Example:
+  ./air_vm looking_glass/looking_glass.air ../looking_glass/
+
+Future work: bytecode compilation, hotpath JIT, additional dispatch types.
+"

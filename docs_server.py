@@ -73,11 +73,29 @@ def scan_components() -> list:
         if sub.is_dir() and not sub.name.startswith(('.', '_')):
             result.append(_make_component(sub.name, sub))
 
-    # Extra top-level modules
-    for name in ('air_meta', 'air_vm'):
+    # Extra top-level modules (directories)
+    for name in ('air_meta',):
         d = ROOT / name
-        if d.exists():
+        if d.exists() and d.is_dir():
             result.append(_make_component(name, d))
+
+    # looking_glass component
+    lg = ROOT / 'looking_glass'
+    if lg.exists() and lg.is_dir():
+        result.append(_make_component('looking_glass', lg))
+
+    # air_vm is now a root-level executable script + air_vm.meta
+    air_vm_meta = ROOT / 'air_vm.meta'
+    air_vm_exe  = ROOT / 'air_vm'
+    if air_vm_meta.exists() or air_vm_exe.exists():
+        files = {}
+        if air_vm_meta.exists():
+            files['air_vm.meta'] = air_vm_meta
+        if air_vm_exe.exists() and air_vm_exe.is_file():
+            files['air_vm'] = air_vm_exe
+        meta = (parse_meta(air_vm_meta.read_text('utf-8', errors='replace'))
+                if air_vm_meta.exists() else {})
+        result.append({'id': 'air_vm', 'path': ROOT, 'files': files, 'meta': meta, 'top': False})
 
     return result
 

@@ -94,7 +94,6 @@ OPERATOR_DICT = {
     '/': slash,
     '%': modulus,
     '^': caret,
-    '//': double_slash,
     '<': less_than,
     '<=': less_than_or_equal,
     '>': greater_than,

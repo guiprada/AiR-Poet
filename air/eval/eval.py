@@ -158,6 +158,15 @@ def interpret(ast: ASTNode, env: TableNode) -> object:
                 return table
 
         procedure = interpret(ast.callee, env)
+
+        # User-defined table function: (fn arg1 arg2) — bind positional args in call env
+        if isinstance(procedure, TableNode):
+            call_env = TableNode(meta_table=env)
+            for arg_node in ast.arguments:
+                value = interpret(arg_node, env)
+                call_env.append(value)
+            return _eval_entries(procedure.entries, call_env)
+
         args = [interpret(arg, env) for arg in ast.arguments]
         try:
             return procedure(*args)

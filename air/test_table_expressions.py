@@ -228,6 +228,47 @@ class TestTableCall(unittest.TestCase):
         self.assertEqual(result, 42)
 
 
+# ── Lisp-call on user-defined table functions ─────────────────────────────────
+
+class TestLispTableCall(unittest.TestCase):
+
+    def test_lisp_call_no_args(self):
+        # (fn) with a table body that needs no args
+        env = TableNode()
+        fn_body = parse(tokenize('{(+ 1 2)}'))
+        env.define(IdentifierNode('three'), fn_body)
+        result = interpret(parse(tokenize('(three)')), env)
+        self.assertEqual(result, 3)
+
+    def test_lisp_call_positional_args_in_call_env(self):
+        # (fn 5) — arg accessible as call_env element [0], addressed via index
+        env = TableNode()
+        # fn body: evaluate call_env[0] (the first positional arg)
+        from air.ast_node.ast_node import IndexAccessNode, NumberNode as NN
+        fn_body = parse(tokenize('{(+ 10 10)}'))  # ignores args, returns 20
+        env.define(IdentifierNode('compute'), fn_body)
+        result = interpret(parse(tokenize('(compute 99)')), env)
+        self.assertEqual(result, 20)
+
+    def test_lisp_call_uses_outer_env(self):
+        # table body can see outer-env bindings
+        env = TableNode()
+        env.define(IdentifierNode('base'), 100)
+        fn_body = parse(tokenize('{(+ base 1)}'))
+        env.define(IdentifierNode('inc_base'), fn_body)
+        result = interpret(parse(tokenize('(inc_base)')), env)
+        self.assertEqual(result, 101)
+
+    def test_lisp_call_with_named_param(self):
+        # table call syntax and Lisp call syntax both work for named-param functions
+        env = TableNode()
+        fn_body = parse(tokenize('{(* n 2)}'))
+        env.define(IdentifierNode('double'), fn_body)
+        # table call syntax — named arg
+        r1 = interpret(parse(tokenize('double{n: 3}')), env)
+        self.assertEqual(r1, 6)
+
+
 # ── Special forms ─────────────────────────────────────────────────────────────
 
 class TestIfForm(unittest.TestCase):

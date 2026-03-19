@@ -6,22 +6,23 @@ A minimal Read-Eval-Print Loop for interactive development and testing.
 Usage:
     python -m air.repl.repl
 
-This REPL currently supports the 'print' command and 'exit' command.
-Extend it step by step to support parsing and evaluation.
-
-Example:
-    >>> print "hello"
-    hello
-    >>> exit
-    Bye!
+Commands:
+    run <path>   — load and run a .air file
+    env          — print current environment
+    exit         — quit the REPL
 """
+try:
+    import readline
+except ImportError:
+    readline = None
+
 from air.tokenizer.tokenizer import tokenize
 from air.parser.parser import parse, parse_program
 from air.interpreter.interpreter import interpret, interpret_program, load_file
 from air.ast_node.ast_node import TableNode
 
 def main():
-    print("Table Scheme REPL. Type 'exit' to quit.")
+    print("AiR REPL. Type 'exit' to quit.")
     env = TableNode()
     while True:
         try:

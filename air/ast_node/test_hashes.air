@@ -1,7 +1,5 @@
-{
-    name: "test_hashes.py"
-    type: "python_source"
-    runtime_type: "cpython"
-    runtime_min_version: "3.10"
-    runtime_max_version: "3.12"
-}
+name: "test_hashes.py"
+type: "python_source"
+runtime_type: "cpython"
+runtime_min_version: "3.10"
+runtime_max_version: "3.12"

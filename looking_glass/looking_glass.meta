@@ -1,0 +1,166 @@
+name: "looking_glass"
+type: "tool"
+about: "
+## Looking Glass
+
+Looking Glass is a web-based inspection and editing server for AiR-Poet units and
+any folder-based software system. It is implemented as an .air program wrapping a
+Python HTTP server.
+
+### Invocation
+
+    air looking_glass.air <root_folder>
+
+The interpreter is called with `looking_glass.air` and a starting root folder.
+Looking Glass scans that folder recursively, discovers all units and files, and
+serves a live web UI at localhost on a configurable port.
+
+### Core Principle
+
+A better point of view is worth many smart points.
+
+The system is designed to help humans and LLMs inspect a project at a level that
+is simultaneously high (you can see the whole shape) and deterministic (nothing is
+hidden, summarized away, or ambiguous). This is the 'looking glass' metaphor:
+a lens that does not distort — it only makes things clearer.
+
+This is especially valuable for observing an evolving code object production
+process. Software is not a snapshot; it is a sequence of intentional changes.
+Looking Glass makes the sequence visible alongside the current state.
+
+---
+
+## Views
+
+### Root View
+The landing page gives a single large editable textarea showing the selected
+file. This is intentionally minimal: one thing in focus at a time.
+- Syntax highlighting for .air, .py, .meta, .md and common formats
+- Inline linting with inline error markers (no separate panel)
+- Line numbers, matching bracket highlight
+- Ctrl+S / Cmd+S saves
+
+### Unit Panel (left sidebar)
+- Tree of all discovered units and their files
+- Click to open a file in the root view
+- Icon indicators for file type (meta / implementation / test / plan / doc)
+- Unit health indicator (tests passing, linting clean)
+
+### Side-by-Side View
+- Any two files can be opened in a split view for comparison
+- Diff mode: highlight additions, deletions, modifications between the two panes
+- The split can be vertical (two files side by side) or horizontal (stacked)
+- Useful for comparing .air spec vs .py implementation, or two versions of a unit
+
+### History Lane
+- A collapsible right panel showing a timeline of snapshots for the open file
+- Snapshots are saved automatically on each Save, or manually labeled
+- Click a snapshot to view it in a read-only third pane (3-way: current / snapshot / diff)
+- This makes the *evolving production process* visible: you can watch a unit grow
+- Snapshots are stored as lightweight diffs in a .looking_glass/ folder at the root
+
+### AI Export View
+- A dedicated page that renders the project as llms.txt, context.md, and index.json
+- These are the same machine-readable summaries used by LLM tooling
+- The view lets you preview exactly what an LLM would see when reading the project
+- Configurable: choose which units and files to include, set depth limits
+
+---
+
+## Navigation & Search
+
+- **Zoom levels**: system → unit → file → line
+  Each zoom level has its own default view. At system level you see the unit graph.
+  At unit level you see the file list + meta. At file level you see the editor.
+  At line level you can anchor a permalink to a specific line.
+- **Full-text search**: Ctrl+K opens a quick-search bar across all files
+  Results show file path, line number, and surrounding context
+  Filtering by file type, unit, or regex is supported
+- **Symbol jump**: Ctrl+P opens a file switcher (fuzzy match on filename or unit name)
+
+---
+
+## Annotation Layer
+
+Annotations are notes attached to a unit, file, or specific line *without modifying
+the source file*. They are stored in .looking_glass/annotations.json.
+- An observer (human reviewer or LLM) can leave notes while in read-only mode
+- Annotations are shown as margin icons; hovering reveals the note text
+- Useful for design reviews, LLM analysis passes, and audit trails
+- Annotations can be exported as a structured report
+
+---
+
+## Themes
+
+Themes are applied globally via a selector in the top bar.
+All themes are CSS variable sets; the editor (CodeMirror) and the UI both switch.
+
+Standard themes:
+  - dark          — default, low-eye-strain dark (Catppuccin Mocha palette)
+  - light         — clean white, print-friendly
+  - solarized     — Solarized Dark / Light toggle
+  - high_contrast — WCAG AAA compliant, maximum legibility
+  - deuteranopia  — color-blind friendly (no red/green distinction)
+
+Custom themes can be added as .css files in .looking_glass/themes/.
+
+---
+
+## Read-Only Inspection Mode
+
+Started with:
+
+    air looking_glass.air <root_folder> --read-only
+
+In this mode:
+- All save buttons are hidden
+- Textarea is rendered non-editable (but still selectable and copyable)
+- Annotations are still allowed
+- Intended for LLM inspection passes or code review sessions where accidental
+  edits should be impossible
+
+---
+
+## Live Reload
+
+Looking Glass watches the root folder with a filesystem watcher.
+When a file changes (by an external editor, a test run, or an LLM tool):
+- The open file in the UI refreshes automatically if it has no unsaved changes
+- A small toast notification announces the change
+- History Lane records the external change as a snapshot labeled 'external'
+
+---
+
+## File Discovery
+
+On startup, Looking Glass scans the root folder:
+1. Finds all .meta files — these define units
+2. For each unit, collects sibling files matching the unit name pattern
+3. All other files are listed under a virtual 'loose files' unit
+4. Hidden folders (starting with .) and __pycache__ are excluded by default
+
+The scan result is the project graph: nodes are units, edges are dependencies
+declared in .meta files. This graph is visualized in the system-level zoom view
+as an interactive node diagram.
+
+---
+
+## Implementation Notes
+
+The server is a pure Python HTTP server (no framework dependency).
+The .air file defines the routing table and handler dispatch as AiR tables.
+The Python side implements file I/O, directory watching, snapshot storage,
+and serving static assets.
+
+The UI is vanilla JS + CodeMirror for the editor. No build step required.
+All assets are inlined or served directly from the looking_glass/ unit folder.
+"
+
+components: {
+    looking_glass_server
+    looking_glass_ui
+    looking_glass_snapshot
+    looking_glass_search
+    looking_glass_theme
+}

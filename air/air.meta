@@ -213,11 +213,18 @@ design_principles: {
 
 # Operators in AiR (from parser.meta)
 operators: {
-    index_access: "t[key]"
-    field_access: "t.field"
-    table_call:   "fn{args}"
-    eval_op:      "<: expr"
-    lisp_call:    "(fn arg1 arg2 ...)"
+    index_access:   "t[key]"
+    field_access:   "t.field"
+    table_call:     "fn{args}"
+    eval_op:        "<: expr"
+    lisp_call:      "(fn arg1 arg2 ...)"
+    floor_division: "(// a b)   — integer floor division, like Python // and Lua 5.3 //"
+}
+
+comments: {
+    hash:      "# ...        — line comment (Python/shell style)"
+    lua_line:  "-- ...       — line comment (Lua style)"
+    lua_block: "--[[ ... ]]  — multiline comment (Lua style)"
 }
 
 # Built-in functions (from prelude)

@@ -13,6 +13,7 @@ AiR treats everything as tables: data, code, and environment. This unified repre
 - **Lazy evaluation**: Code remains unevaluated until explicitly requested
 - **Mixed indexing**: Arrays (positional) and maps (named keys) coexist seamlessly
 - **Module composition**: Pure modules via require:, stateful systems via initialize:
+- **Constructive iteration**: Programs are repaired by patching subtrees, not regenerated from scratch
 
 ### Language Features
 
@@ -27,7 +28,7 @@ AiR treats everything as tables: data, code, and environment. This unified repre
   - Lazy: {+ 1 2} remains as AST until evaluated
   - Special forms: {if: cond, then: a, else: b}, {require: ...}, {initialize: ...}
 
-**Scope & Environment**: 
+**Scope & Environment**:
   - Each table has optional _meta_table parent
   - Lookup cascades: child -> parent -> parent's parent
   - Mutation is local (doesn't affect parent)
@@ -44,23 +45,23 @@ Every top-level .air file must have:
 1. **test**: Validation logic
    - Keys: numbered entries with assertions
    - Semantics: execute assertions in order
-   
+
 2. **module**: Pure functions and constants
    - Keys: function/constant definitions
    - Semantics: imported with require:, never instantiated
-   
+
 3. **system**: Stateful application with lifecycle
    - Keys: init, start, update, pause, stop, require:, initialize:, data, tests
    - Semantics: instantiated with initialize:, manages execution
-   
+
 4. **data**: Structured data
    - Keys: any field names or positioned entries
    - Semantics: pure data, no behavior
-   
+
 5. **computation**: Arithmetic/logic operations
    - Keys: expressions that compute values
    - Semantics: evaluable on demand
-   
+
 6. **logic**: Control flow
    - Keys: conditional/loop expressions
    - Semantics: evaluable with side effects
@@ -85,7 +86,7 @@ Same `.meta` + `.prompt` consensus produces identical implementation because:
 
 AiR serves as the intermediary between:
 - **Input**: User `.meta` specifications
-- **Processing**: AI `.prompt` planning  
+- **Processing**: AI `.prompt` planning
 - **Output**: Executable `.air` implementation files
 
 The lazy evaluation model allows:
@@ -93,3 +94,156 @@ The lazy evaluation model allows:
 - Incremental consensus updates between user and AI
 - Non-destructive testing and validation
 "
+
+also_known_as: {
+    "AiR table"
+    "air table"
+    "lisp in tables"
+    "lispin'lua"
+    "t-exp language"
+}
+
+# t-exp: Table Expression — AiR's equivalent of s-exp (symbolic expression in Lisp)
+# The key difference: t-exp is lazy by default. { } blocks stay as AST data
+# until explicitly forced. This makes the AST a first-class value.
+#
+# s-exp:  (+ 1 2)        → evaluates immediately
+# t-exp:  { + 1 2 }      → stays as data (AST node), passable, inspectable, patchable
+#         ( + 1 2 )      → evaluates immediately (like s-exp)
+#         <:{ + 1 2 }    → force-evaluate a lazy t-exp
+
+syntax: {
+    # Table literal — data and code in one
+    table_literal: "{ key: value, key2: value2, positional_entry }"
+
+    # Positional (array) and named (map) entries coexist
+    mixed_table: "{ 'a'  b: 2  c: \"oba\"  x }"
+
+    # t-exp as lazy code block (stays as AST)
+    lazy_block: "{
+        (define a \"hello\")
+        (define b \"world\")
+        (print (+ a b))
+    }"
+
+    # Force-evaluate a lazy t-exp
+    eval_op: "<: lazy_block"
+    eval_lisp: "(eval lazy_block)"
+
+    # Immediate evaluation (s-exp style)
+    immediate: "(fn arg1 arg2)"
+
+    # Access patterns
+    positional_access: "t[0]  t[1]"
+    named_access:      "t.field  t[\"key\"]"
+    computed_access:   "t[expr]"
+}
+
+special_forms: {
+    define:        "(define name value)            — bind name in current env"
+    if_then_else:  "{ if: cond, then: a, else: b } — conditional"
+    init_cond_loop: "{
+        init: (define i 0)
+        cond: (<= i 5)
+        loop: (
+            (print i)
+            (define i (+ i 1))
+        )
+    }"
+    require:       "require: { mod: \"path.air\" }    — import pure module (immutable)"
+    initialize:    "initialize: { sys: \"path.air\" } — instantiate stateful system"
+}
+
+evaluation_model: {
+    numbers:     "return as-is (int or float)"
+    strings:     "return stripped string value"
+    booleans:    "return true / false"
+    symbols:     "return as atom"
+    identifiers: "look up in env chain → prelude → builtins"
+    tables:      "LAZY — returned as AST node unless <: or (eval ...) is applied"
+    lisp_call:   "(fn a b) — evaluate fn, then apply to evaluated args"
+    eval_op:     "<: t-exp — force-evaluate the t-exp as a code block"
+}
+
+design_principles: {
+    homoiconicity: "
+        Code IS data. A { } block is an ASTNode (TableNode).
+        You can pass it, inspect it, store it, and patch individual fields.
+        Same principle as Lisp s-expressions, but carried by Lua-style tables.
+    "
+    constructive_iteration: "
+        Programs are never thrown away and regenerated from scratch.
+        Because the AST is always preserved as a t-exp tree, a broken subtree
+        can be identified and replaced surgically. The rest of the program stays intact.
+        Fix history is itself expressible as t-exp transformations — composable, replayable.
+    "
+    multi_representation: "
+        A single AiR program exists in multiple views simultaneously:
+          - Source text (.air file, human readable)
+          - AST-as-data (TableNode graph, inspectable and patchable)
+          - Evaluatable tree (lazy, force on demand)
+        The LLM operates on the AST-as-data view, generating or patching nodes.
+        The runtime operates on the evaluatable view.
+    "
+    turtles_all_the_way_down: "
+        air.air defines the AiR language in AiR notation.
+        ast_node.air defines AiR AST node types in AiR notation.
+        The self-hosting seed: the language describes itself.
+        No external meta-language is needed — the representation is self-similar.
+    "
+    llm_as_compiler: "
+        The META system uses LLMs as the compiler for the .meta -> .air pipeline:
+          .meta  (user spec)
+            → .prompt  (AI planning, generated fresh each iteration)
+            → .air     (AI-generated implementation, deterministic given same .meta)
+        The LLM reads the spec and plan, then generates the t-exp tree.
+        Correct prompting makes this predictable and eventually deterministic.
+    "
+}
+
+# Operators in AiR (from parser.meta)
+operators: {
+    index_access: "t[key]"
+    field_access: "t.field"
+    table_call:   "fn{args}"
+    eval_op:      "<: expr"
+    lisp_call:    "(fn arg1 arg2 ...)"
+}
+
+# Built-in functions (from prelude)
+intrinsics: {
+    arithmetic:  "add sub mult div mod sqrt exp log"
+    comparison:  "eq neq lt gt lte gte"
+    logic:       "and or not"
+    type_checks: "typeof is_number is_string is_table is_boolean"
+    table_ops:   "get set keys values merge"
+    assertions:  "assert_eq assert_neq assert_less assert_lesseq"
+    control:     "define eval require initialize"
+}
+
+# Self-hosting reference
+self_hosting: {
+    air_spec:      "air/air.air      — AiR language defined in AiR"
+    ast_node_spec: "air/ast_node/ast_node.air — AiR AST node types in AiR"
+    about: "
+        These files are the self-hosting seed. They do not yet run through
+        the AiR interpreter (bootstrapping gap), but they define the intended
+        target state: AiR describing itself without any external meta-language.
+    "
+}
+
+implementation: {
+    tokenizer:   "air/tokenizer/tokenizer.py"
+    parser:      "air/parser/parser.py"
+    ast_node:    "air/ast_node/ASTNode.py"
+    interpreter: "air/interpreter/interpreter.py"
+    prelude:     "air/prelude/prelude.py"
+    repl:        "air/repl/repl.py"
+}
+
+related: {
+    air_poet_meta: "air_poet.meta     — AiR-Poet system specification"
+    air_meta:      "air_meta/air_meta.meta — META methodology specification"
+    t_exp_docs:    "docs/t-exp.md     — t-exp syntax reference and examples"
+    bootstrap:     "bootstrap_meta.meta — META system bootstrap"
+}

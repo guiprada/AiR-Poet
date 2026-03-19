@@ -47,19 +47,43 @@ class TestTokenize(unittest.TestCase):
         tokens = tokenize('')
         self.assertEqual(tokens, [])
 
-    def test_tokenize_line_comment_skipped(self):
-        tokens = tokenize('// a comment\n(+ 1 2)')
+    def test_tokenize_hash_line_comment_skipped(self):
+        tokens = tokenize('# a comment\n(+ 1 2)')
         self.assertEqual(len(tokens), 5)
         self.assertEqual(tokens[0], Token('lparen', '(', 2, 1))
 
-    def test_tokenize_inline_comment(self):
-        tokens = tokenize('42 // the answer')
+    def test_tokenize_hash_inline_comment(self):
+        tokens = tokenize('42 # the answer')
         self.assertEqual(len(tokens), 1)
         self.assertEqual(tokens[0], Token('number', '42', 1, 1))
 
-    def test_tokenize_comment_only(self):
-        tokens = tokenize('// nothing')
+    def test_tokenize_hash_comment_only(self):
+        tokens = tokenize('# nothing')
         self.assertEqual(tokens, [])
+
+    def test_tokenize_lua_line_comment_skipped(self):
+        tokens = tokenize('-- a comment\n(+ 1 2)')
+        self.assertEqual(len(tokens), 5)
+        self.assertEqual(tokens[0], Token('lparen', '(', 2, 1))
+
+    def test_tokenize_lua_inline_comment(self):
+        tokens = tokenize('42 -- the answer')
+        self.assertEqual(len(tokens), 1)
+        self.assertEqual(tokens[0], Token('number', '42', 1, 1))
+
+    def test_tokenize_lua_comment_only(self):
+        tokens = tokenize('-- nothing')
+        self.assertEqual(tokens, [])
+
+    def test_tokenize_lua_multiline_comment(self):
+        tokens = tokenize('--[[ this is\na multiline\ncomment ]](+ 1 2)')
+        self.assertEqual(len(tokens), 5)
+        self.assertEqual(tokens[0], Token('lparen', '(', 3, 12))
+
+    def test_tokenize_floor_division_operator(self):
+        tokens = tokenize('(// 7 2)')
+        self.assertEqual(len(tokens), 5)
+        self.assertEqual(tokens[1], Token('identifier', '//', 1, 2))
 
     def test_tokenize_less_than(self):
         tokens = tokenize('(< x 3)')

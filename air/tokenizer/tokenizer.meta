@@ -16,10 +16,17 @@ token_types: {
     string symbol number identifier
 }
 
+comments: {
+    hash:      "# ...        — line comment (Python/shell style)"
+    lua_line:  "-- ...       — line comment (Lua style)"
+    lua_block: "--[[ ... ]]  — multiline comment (Lua style)"
+}
+
 errors: {
-    unmatched_paren:  "Unmatched parentheses"
-    unmatched_quote:  "Unmatched double-quote"
-    invalid_char:     "Unexpected character in source"
+    unmatched_paren:    "Unmatched parentheses"
+    unmatched_quote:    "Unmatched double-quote"
+    unclosed_lua_block: "Unclosed --[[ comment"
+    invalid_char:       "Unexpected character in source"
 }
 
 implementation: "tokenizer.py"

@@ -43,7 +43,7 @@ class Token:
 
 
 # Characters that always terminate a token when scanning forward
-_STOP_CHARS = set('(){}[].,:</')
+_STOP_CHARS = set('(){}[].,:</#')
 
 
 def handle_string_literal(code: str, tokens: list, start_pos: int, line: int, column: int) -> Tuple[int, int, int]:
@@ -164,13 +164,46 @@ def tokenize(code: str) -> list:
                 tokens.append(Token('comma', ',', line, column))
                 current_pos += 1
                 column += 1
-            case '/':
-                # // starts a line comment — skip to end of line
-                if current_pos + 1 < len(code) and code[current_pos + 1] == '/':
-                    while current_pos < len(code) and code[current_pos] != '\n':
-                        current_pos += 1
+            case '#':
+                # # starts a line comment — skip to end of line
+                while current_pos < len(code) and code[current_pos] != '\n':
+                    current_pos += 1
+            case '-':
+                # -- starts a Lua-style comment
+                if current_pos + 1 < len(code) and code[current_pos + 1] == '-':
+                    if (current_pos + 3 < len(code)
+                            and code[current_pos + 2] == '['
+                            and code[current_pos + 3] == '['):
+                        # --[[ ... ]] multiline comment
+                        current_pos += 4
+                        column += 4
+                        while current_pos + 1 < len(code):
+                            if code[current_pos] == ']' and code[current_pos + 1] == ']':
+                                current_pos += 2
+                                column += 2
+                                break
+                            if code[current_pos] == '\n':
+                                line += 1
+                                column = 1
+                            else:
+                                column += 1
+                            current_pos += 1
+                        else:
+                            raise ValueError("Tokenizer - Unclosed --[[ comment")
+                    else:
+                        # -- line comment — skip to end of line
+                        while current_pos < len(code) and code[current_pos] != '\n':
+                            current_pos += 1
                 else:
-                    # bare '/' treated as an identifier (e.g. division operator in future)
+                    # bare '-' or negative number — let handle_other_tokens decide
+                    current_pos, line, column = handle_other_tokens(code, tokens, current_pos, line, column)
+            case '/':
+                # // is floor division; bare / is regular division
+                if current_pos + 1 < len(code) and code[current_pos + 1] == '/':
+                    tokens.append(Token('identifier', '//', line, column))
+                    current_pos += 2
+                    column += 2
+                else:
                     tokens.append(Token('identifier', '/', line, column))
                     current_pos += 1
                     column += 1

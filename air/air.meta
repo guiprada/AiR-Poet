@@ -177,6 +177,16 @@ design_principles: {
         can be identified and replaced surgically. The rest of the program stays intact.
         Fix history is itself expressible as t-exp transformations — composable, replayable.
     "
+    homoiconic_fix_format: "
+        Fixes are homoiconic: a patch to an AiR program is itself an AiR t-exp.
+        To fix a subtree, replace it with a new t-exp node — same representation,
+        same rules. This means:
+          - Fixes can be stored, versioned, and applied like any other data
+          - Fix pipelines compose: apply fix_a then fix_b is just a table of fixes
+          - An LLM generating a fix produces a t-exp, not a diff or prose instruction
+          - The repair history is inspectable and replayable without special tooling
+        The format never changes between 'program' and 'patch' — both are t-exp trees.
+    "
     multi_representation: "
         A single AiR program exists in multiple views simultaneously:
           - Source text (.air file, human readable)

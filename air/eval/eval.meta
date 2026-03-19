@@ -1,0 +1,29 @@
+name: "eval"
+type: "module"
+about: "
+Tree-walking evaluator for AiR ASTs.
+
+Imports prelude to build LOOKUP — the global function/operator table.
+No circular dependency: eval → prelude, not the other way.
+
+Entry points:
+  interpret(ast, env)         → evaluate a single AST node
+  interpret_program(ast, env) → evaluate a full program (top-level bindings persist)
+  eval_table(table, env)      → evaluate a TableNode as a code block
+
+Special forms (detected by key presence in table.map):
+  { if: cond, then: expr, else: expr }               — conditional
+  { init: {...}, cond: expr, loop: {...} }            — loop with state
+  (define key value)                                  — bind in current env
+  (eval table)                                        — explicitly evaluate lazy table
+
+Evaluation model:
+  Numbers, Strings, Symbols  → unwrapped Python values
+  TableNode                  → lazy (returned as-is)
+  IdentifierNode             → env chain lookup, then LOOKUP
+  EvalNode (<: expr)         → force-evaluate a table
+
+Future backends (same interface, different implementation):
+  bytecode    — compile to stack-machine bytecode, run on a VM
+  compile_py  — emit Python source from AST
+"

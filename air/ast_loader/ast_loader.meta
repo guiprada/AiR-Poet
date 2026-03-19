@@ -1,0 +1,13 @@
+name: "ast_loader"
+type: "module"
+about: "
+Loads AiR source files from disk and parses them into an AST.
+
+Pipeline: file path → read source → tokenize → parse_program → TableNode AST
+
+Entry point: load_file(file_path) → TableNode
+
+Errors:
+  FileNotFoundError  — file could not be read
+  ValueError         — tokenizer or parser rejected the source
+"

@@ -1,11 +1,8 @@
-name: "prelude"
-type: "module"
-about: "AiR prelude defined in AiR notation — placeholder for self-hosting"
+-- prelude.air — loaded at bootstrap to expose intrinsics under AiR-canonical names.
+-- Intrinsics live in Python (intrinsics.py) and are reachable via LOOKUP by their
+-- Python names.  This file binds the names AiR code should actually use.
 
-add:      { about: "add two numbers",      input: { x: number, y: number }, output: number }
-subtract: { about: "subtract y from x",    input: { x: number, y: number }, output: number }
-multiply: { about: "multiply two numbers", input: { x: number, y: number }, output: number }
-divide:   { about: "divide x by y",        input: { x: number, y: number }, output: number }
-modulus:  { about: "x mod y",              input: { x: number, y: number }, output: number }
-exponent: { about: "x to the power of y",  input: { x: number, y: number }, output: number }
-floor_divide: { about: "floor division",   input: { x: number, y: number }, output: number }
+-- Logic
+(define not not_fn)
+(define and and_fn)
+(define or  or_fn)

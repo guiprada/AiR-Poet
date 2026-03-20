@@ -18,12 +18,11 @@ except ImportError:
 
 from air.tokenizer.tokenizer import tokenize
 from air.parser.parser import parse, parse_program
-from air.interpreter.interpreter import interpret, interpret_program, load_file
-from air.ast_node.ast_node import TableNode
+from air.interpreter.interpreter import interpret, interpret_program, load_file, make_base_env
 
 def main():
     print("AiR REPL. Type 'exit' to quit.")
-    env = TableNode()
+    env = make_base_env()
     while True:
         try:
             line = input(">>> ")

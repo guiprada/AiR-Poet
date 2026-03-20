@@ -97,6 +97,12 @@ def is_null(x):
 def not_fn(x):
     return not x
 
+def and_fn(a, b):
+    return bool(a) and bool(b)
+
+def or_fn(a, b):
+    return bool(a) or bool(b)
+
 ## ----------------------------------------------------------------------------
 ## Operator table
 

@@ -6,6 +6,7 @@ import air.prelude.prelude as prelude
 LOOKUP = {name: getattr(prelude, name) for name in dir(prelude) if callable(getattr(prelude, name))}
 LOOKUP.update(prelude.OPERATOR_DICT)
 LOOKUP.update(prelude.build_builtin_lookup())
+LOOKUP.update({'True': True, 'False': False, 'None': None})
 
 _IF_KEY   = IdentifierNode('if')
 _THEN_KEY = IdentifierNode('then')

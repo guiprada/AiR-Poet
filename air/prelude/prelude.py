@@ -6,7 +6,7 @@ from air.intrinsics.intrinsics import (
     divide, slash, divider,
     modulus, exponent, caret, floor_divide, double_slash,
     less_than, less_than_or_equal, greater_than, greater_than_or_equal, equal, not_equal,
-    is_number, is_null, not_fn,
+    is_number, is_null, not_fn, and_fn, or_fn,
     OPERATOR_DICT, OPERATOR_LIST,
 )
 

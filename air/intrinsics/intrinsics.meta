@@ -1,0 +1,60 @@
+name: "intrinsics"
+type: "meta"
+about: "Core arithmetic, comparison, and type-predicate functions for AiR.
+        These are the primitive building blocks present in every environment.
+        Intrinsics live here; prelude.py is a thin shim that re-exports them."
+
+arithmetic: {
+    variadic: {
+        adder:      "0 args → 0 (identity for +)    ; 1+ → sum"
+        subtracter: "0 args → TypeError             ; 1 arg → negation ; 2+ → fold subtract"
+        multiplier: "0 args → 1 (identity for *)    ; 1+ → fold multiply"
+        divider:    "requires 2+ args               ; always float result"
+    }
+    binary: {
+        add / plus:             "x + y"
+        subtract / minus:       "x - y"
+        multiply / star:        "x * y"
+        divide / slash:         "x / y  (float)"
+        floor_divide / double_slash: "x // y  (integer floor)"
+        modulus:                "x % y"
+        exponent / caret:       "x ** y"
+    }
+}
+
+comparison: {
+    less_than less_than_or_equal greater_than greater_than_or_equal equal not_equal
+}
+
+type_predicates: {
+    is_number: "isinstance(x, (int, float))"
+    is_null:   "x is None"
+    not_fn:    "not x — boolean negation  (named not_fn to avoid Python keyword)"
+}
+
+operators: {
+    "+": plus,  "-": subtracter,  "*": star,  "/": slash
+    "//": double_slash,  "%": modulus,  "^": caret
+    "<": less_than,  "<=": less_than_or_equal
+    ">": greater_than,  ">=": greater_than_or_equal
+    "==": equal,  "!=": not_equal
+}
+
+lightning_compatibility: {
+    about: "Aiming for naming and semantic parity with the lightning language prelude"
+    implemented: "is_number  is_null  not_fn"
+    todo: {
+        concat:              "(..) string/table concatenation"
+        and_fn / or_fn / xor_fn: "short-circuit logical operators"
+        write_line / write:  "I/O output (currently via Python print builtin)"
+        read_line / read_number / read: "console input"
+        to_integer / to_float / to_string: "type coercions (use Python int/float/str)"
+        type_of:             "runtime type name (distinguish from Python type builtin)"
+        Table / List:        "collection constructors"
+        try_fn:              "protected call returning result type"
+        require / initialize: "module system (interpreter special forms, not functions)"
+    }
+}
+
+tests: "air/intrinsics/test.py"
+implementation: "air/intrinsics/intrinsics.py"

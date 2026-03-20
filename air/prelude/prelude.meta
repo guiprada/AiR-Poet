@@ -1,32 +1,17 @@
 name: "prelude"
 type: "meta"
-about: "Built-in functions and operators available in every AiR environment"
+about: "Thin shim that assembles the AiR runtime environment.
+        Arithmetic, comparison, and type-predicate functions live in intrinsics.
+        Prelude re-exports them and bridges Python builtins via build_builtin_lookup()."
 
-arithmetic: {
-    add subtract multiply divide modulus exponent floor_divide
+role: "assembler — not the source of truth for functions"
+
+exports: {
+    from_intrinsics: "arithmetic  comparison  type_predicates  OPERATOR_DICT  OPERATOR_LIST"
+    own:             "build_builtin_lookup()"
 }
 
-aliases: {
-    plus: add
-    minus: subtract
-    star: multiply
-    slash: divide
-    caret: exponent
-    double_slash: floor_divide
-}
+builtins: "Python builtins exposed via build_builtin_lookup() (callable builtins only)"
 
-variadic: {
-    adder:       "sum of any number of args"
-    subtracter:  "fold subtraction over args"
-    multiplier:  "fold multiplication over args"
-    divider:     "fold division over args"
-}
-
-operators: {
-    "+": plus, "-": minus, "*": star, "/": slash
-    "%": modulus, "^": caret, "//": double_slash
-}
-
-builtins: "Python builtins exposed via build_builtin_lookup()"
-
-implementation: "prelude.py"
+implementation: "air/prelude/prelude.py"
+intrinsics: "air/intrinsics/intrinsics.meta"

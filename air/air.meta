@@ -209,6 +209,31 @@ design_principles: {
         The LLM reads the spec and plan, then generates the t-exp tree.
         Correct prompting makes this predictable and eventually deterministic.
     "
+    tests_as_specification: "
+        Tests ARE the specification. Test files define what 'done' means.
+        A failing test is a missing or broken implementation.
+        A missing test is an undefined requirement.
+        Progress = tests_passing / tests_defined.
+
+        This aligns with the META pipeline:
+          .meta  → describes what should exist          (requirements)
+          tests  → define what 'correct' means          (acceptance criteria)
+          .air   → fulfills both, verified by the suite (implementation)
+
+        The test suite is the estimator of completeness.
+        If 7 of 10 tests pass, 30% is still missing or broken.
+        Writing a new test before its implementation is the canonical way
+        to extend the spec: the test is the agreement, the code is the proof.
+        This mindset should permeate every .meta file and every module.
+    "
+    divide_and_conquer: "
+        Large concerns are split into focused units, each with its own .meta.
+        The parent module (e.g. prelude) becomes a thin shim that assembles units.
+        Each unit: its own .meta, its own implementation file, its own test file.
+        This makes units independently testable, replaceable, and documentable.
+        Example: arithmetic + comparison functions live in air/intrinsics/,
+        prelude.py is now just a re-export shim + build_builtin_lookup().
+    "
 }
 
 # Operators in AiR (from parser.meta)
@@ -272,6 +297,7 @@ implementation: {
     parser:      "air/parser/parser.py"
     ast_node:    "air/ast_node/ASTNode.py"
     interpreter: "air/interpreter/interpreter.py"
+    intrinsics:  "air/intrinsics/intrinsics.py"
     prelude:     "air/prelude/prelude.py"
     repl:        "air/repl/repl.py"
 }

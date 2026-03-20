@@ -97,6 +97,29 @@ class TestTokenize(unittest.TestCase):
         tokens = tokenize('<:')
         self.assertEqual(tokens[0], Token('eval_op', '<:', 1, 1))
 
+    def test_tokenize_float_literal(self):
+        tokens = tokenize('3.14')
+        self.assertEqual(len(tokens), 1)
+        self.assertEqual(tokens[0], Token('number', '3.14', 1, 1))
+
+    def test_tokenize_float_in_expression(self):
+        tokens = tokenize('(+ 1.5 2.5)')
+        self.assertEqual(tokens[2], Token('number', '1.5', 1, 4))
+        self.assertEqual(tokens[3], Token('number', '2.5', 1, 8))
+
+    def test_tokenize_dot_field_access_not_float(self):
+        # t.field should be 3 tokens: identifier, dot, identifier — not one float token
+        tokens = tokenize('t.x')
+        self.assertEqual(len(tokens), 3)
+        self.assertEqual(tokens[0], Token('identifier', 't', 1, 1))
+        self.assertEqual(tokens[1], Token('dot', '.', 1, 2))
+        self.assertEqual(tokens[2], Token('identifier', 'x', 1, 3))
+
+    def test_tokenize_negative_float(self):
+        tokens = tokenize('-3.14')
+        self.assertEqual(len(tokens), 1)
+        self.assertEqual(tokens[0], Token('number', '-3.14', 1, 1))
+
 
 if __name__ == "__main__":
     unittest.main()

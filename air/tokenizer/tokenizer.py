@@ -75,15 +75,15 @@ def handle_other_tokens(code: str, tokens: list, start_pos: int, line: int, colu
     lookahead = start_pos
     while lookahead < len(code):
         ch = code[lookahead]
-        if ch.isspace() or ch in _STOP_CHARS:
-            break
-        # Allow '.' inside a float (N.N), but stop at standalone '.'
+        # Check float dot BEFORE stop chars: '.' is in _STOP_CHARS but N.N is a single token.
         if ch == '.':
             prev_digit = lookahead > start_pos and code[lookahead - 1].isdigit()
             next_digit = lookahead + 1 < len(code) and code[lookahead + 1].isdigit()
             if prev_digit and next_digit:
                 lookahead += 1
                 continue
+            break  # standalone '.' — stop scanning
+        if ch.isspace() or ch in _STOP_CHARS:
             break
         lookahead += 1
 

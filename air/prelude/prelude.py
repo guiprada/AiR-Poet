@@ -18,9 +18,11 @@ plus = add
 
 def subtracter(*args):
     if not args:
-        return 0  # Handle the case of no arguments
-    result = args[0]  # Start with the first argument
-    for arg in args[1:]:  # Subtract the remaining arguments
+        return 0
+    if len(args) == 1:
+        return -args[0]  # unary negation: (- 5) → -5
+    result = args[0]
+    for arg in args[1:]:
         result -= arg
     return result
 
@@ -89,7 +91,7 @@ def not_equal(x, y):
 ## ----------------------------------------------------------------------------
 OPERATOR_DICT = {
     '+': plus,
-    '-': minus,
+    '-': subtracter,
     '*': star,
     '/': slash,
     '//': double_slash,

@@ -305,25 +305,65 @@ class TestLoopForm(unittest.TestCase):
         self.assertEqual(result, 5)  # last assigned is i=5
 
 
-# ── Comments (// line comments) ───────────────────────────────────────────────
+# ── Comments ──────────────────────────────────────────────────────────────────
+# NOTE: // is floor division in AiR, NOT a comment.
+# Comment styles: #  (hash line),  --  (Lua line),  --[[ ... ]]  (Lua block)
 
 class TestComments(unittest.TestCase):
 
-    def test_line_comment_skipped(self):
-        result = run_program('// this is a comment\n(+ 1 2)')
+    def test_hash_line_comment_skipped(self):
+        result = run_program('# this is a comment\n(+ 1 2)')
         self.assertEqual(result, 3)
 
-    def test_inline_comment(self):
-        result = run_program('(+ 1 2) // add one and two')
+    def test_hash_inline_comment(self):
+        result = run_program('(+ 1 2) # add one and two')
         self.assertEqual(result, 3)
 
-    def test_comment_only(self):
-        tokens = tokenize('// nothing here')
+    def test_hash_comment_only_produces_no_tokens(self):
+        tokens = tokenize('# nothing here')
         self.assertEqual(tokens, [])
 
-    def test_comment_in_table(self):
-        result = run_program('// header\n{x: 1, y: 2}.x')
+    def test_hash_comment_in_program(self):
+        result = run_program('# header\n{x: 1, y: 2}.x')
         self.assertEqual(result, 1)
+
+    def test_lua_line_comment_skipped(self):
+        result = run_program('-- Lua style comment\n(+ 3 4)')
+        self.assertEqual(result, 7)
+
+    def test_lua_block_comment_skipped(self):
+        result = run_program('--[[ block\ncomment\n]](+ 5 6)')
+        self.assertEqual(result, 11)
+
+    def test_lua_block_comment_only_produces_no_tokens(self):
+        tokens = tokenize('--[[ nothing ]]')
+        self.assertEqual(tokens, [])
+
+
+# ── Floor division ─────────────────────────────────────────────────────────────
+
+class TestFloorDivision(unittest.TestCase):
+    """End-to-end: tokenize → parse → interpret for the // operator."""
+
+    def test_floor_div_basic(self):
+        self.assertEqual(run('(// 7 2)'), 3)
+
+    def test_floor_div_exact(self):
+        self.assertEqual(run('(// 6 2)'), 3)
+
+    def test_floor_div_negative_dividend(self):
+        # Python (and AiR) floor division: -7 // 2 = -4
+        self.assertEqual(run('(// -7 2)'), -4)
+
+    def test_floor_div_in_expression(self):
+        # (+ (// 10 3) 1) = 3 + 1 = 4
+        self.assertEqual(run('(+ (// 10 3) 1)'), 4)
+
+    def test_floor_div_identifier_in_lookup(self):
+        # // resolves to floor_divide in the prelude OPERATOR_DICT
+        from air.prelude.prelude import floor_divide
+        from air.eval.eval import LOOKUP
+        self.assertIs(LOOKUP['//'], floor_divide)
 
 
 # ── define and environment ────────────────────────────────────────────────────

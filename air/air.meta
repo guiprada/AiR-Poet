@@ -229,13 +229,31 @@ comments: {
 
 # Built-in functions (from prelude)
 intrinsics: {
-    arithmetic:  "add sub mult div mod sqrt exp log"
-    comparison:  "eq neq lt gt lte gte"
-    logic:       "and or not"
-    type_checks: "typeof is_number is_string is_table is_boolean"
-    table_ops:   "get set keys values merge"
-    assertions:  "assert_eq assert_neq assert_less assert_lesseq"
-    control:     "define eval require initialize"
+    # Arithmetic — variadic and binary aliases, both available by name
+    arithmetic: "
+        add / plus / adder           — addition          (+)
+        subtracter / subtract / minus — subtraction      (-)   unary: (- x) → -x
+        multiply / star / multiplier  — multiplication   (*)
+        divide / slash / divider      — float division   (/)
+        floor_divide / double_slash   — floor division   (//)
+        modulus                       — modulo           (%)
+        exponent / caret              — exponentiation   (^)
+    "
+
+    # Operator symbols — same functions via OPERATOR_DICT
+    operator_symbols: "+ - * / // % ^ < <= > >= == !="
+
+    # Comparison — long names only (symbols preferred in practice)
+    comparison: "less_than  less_than_or_equal  greater_than  greater_than_or_equal  equal  not_equal"
+
+    # Control — special forms handled by the interpreter, not prelude callables
+    control: "define  eval"
+
+    # Python builtins — available via build_builtin_lookup() (callable builtins only)
+    builtins: "abs  bool  chr  float  int  len  max  min  ord  print  range  round  str  sum  type"
+
+    # Planned — not yet implemented
+    todo: "typeof  is_number  is_string  is_table  and  or  not  assert_eq  get  set  keys  values  merge  require  initialize"
 }
 
 # Self-hosting reference
